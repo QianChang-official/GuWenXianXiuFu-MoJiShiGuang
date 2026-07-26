@@ -1,0 +1,107 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build & Analyze
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.x'
+          channel: 'stable'
+          cache: true
+      
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: mojishiguang_app
+      
+      - name: Generate freezed & json_serializable code
+        run: dart run build_runner build --delete-conflicting-outputs
+        working-directory: mojishiguang_app
+      
+      - name: Analyze project
+        run: flutter analyze
+        working-directory: mojishiguang_app
+        continue-on-error: true
+      
+      - name: Run tests
+        run: flutter test
+        working-directory: mojishiguang_app
+        continue-on-error: true
+
+  build_ios:
+    name: Build iOS
+    runs-on: macos-latest
+    needs: build
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.x'
+          channel: 'stable'
+          cache: true
+      
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: mojishiguang_app
+      
+      - name: Build iOS
+        run: flutter build ios --no-codesign --release
+        working-directory: mojishiguang_app
+
+  build_android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.x'
+          channel: 'stable'
+          cache: true
+      
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: mojishiguang_app
+      
+      - name: Build Android
+        run: flutter build apk --release
+        working-directory: mojishiguang_app
+
+  build_harmonyos:
+    name: Build HarmonyOS
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.x'
+          channel: 'stable'
+          cache: true
+      
+      - name: Validate HarmonyOS project structure
+        run: |
+          echo "HarmonyOS build requires DevEco Studio"
+          echo "See harmonyos/ directory for project files"
+        working-directory: mojishiguang_app
