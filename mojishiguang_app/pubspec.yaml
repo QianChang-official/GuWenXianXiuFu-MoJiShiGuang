@@ -47,20 +47,20 @@ dependencies:
   flutter_staggered_animations: ^1.1.0
 
   # 分享与导出
-  share_plus: ^7.2.0
+  share_plus: ^10.0.0
   screenshot: ^2.1.0
   path: ^1.9.0
 
   # 平台工具
   permission_handler: ^11.3.0
-  device_info_plus: ^9.1.0
-  package_info_plus: ^5.0.0
-  connectivity_plus: ^5.0.0
+  device_info_plus: ^11.0.0
+  package_info_plus: ^9.0.1
+  connectivity_plus: ^6.0.0
 
   # 国际化
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
+  intl: ^0.20.0
 
   # 工具库
   equatable: ^2.0.0
@@ -76,10 +76,10 @@ dev_dependencies:
   # 代码生成
   build_runner: ^2.4.0
   freezed: ^2.5.0
-  json_serializable: ^6.7.0
+  json_serializable: ^6.8.0
   riverpod_generator: ^2.4.0
   drift_dev: ^2.16.0
-  retrofit_generator: ^8.1.0
+  retrofit_generator: ^9.0.0
 
   # 测试
   mocktail: ^1.0.0
