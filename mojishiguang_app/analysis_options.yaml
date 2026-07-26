@@ -1,0 +1,47 @@
+# 「墨迹时光」Dart 分析配置
+# 遵循 Flutter 3.x 推荐配置 + 严格的代码质量规范
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # 代码风格
+    - always_declare_return_types
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - prefer_final_locals
+    - avoid_unnecessary_containers
+    - avoid_redundant_argument_values
+    - avoid_print
+    - prefer_single_quotes
+    - require_trailing_commas
+    - unawaited_futures
+    
+    # 命名规范
+    - camel_case_types
+    - constant_identifier_names
+    - non_constant_identifier_names
+    - file_names
+    
+    # 性能
+    - use_key_in_widget_constructors
+    - avoid_unused_constructor_parameters
+    - prefer_const_constructors_in_immutables
+    
+    # 空安全
+    - avoid_null_checks_in_equality_operators
+    - unnecessary_null_comparison
+    - avoid_init_to_null
+    - avoid_returning_null
+
+analyzer:
+  errors:
+    invalid_annotation_target: ignore
+    unused_import: warning
+    unused_local_variable: warning
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "lib/generated/**"
+    - "build/**"
+    - ".dart_tool/**"

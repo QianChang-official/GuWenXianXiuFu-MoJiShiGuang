@@ -1,0 +1,88 @@
+{
+  /* ────────────────────────────────────────────────────────────────────────────
+     HarmonyOS 模块配置
+     为「墨迹时光」配置相机、媒体库、网络等权限及 Ability 声明。
+     ──────────────────────────────────────────────────────────────────────────── */
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "description": "墨迹时光 - 碑帖古籍修复与识别",
+    "mainElement": "MainAbility",
+    "deviceTypes": ["phone", "tablet"],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "pages": "$profile:main_pages",
+
+    /* ========== 权限声明 ========== */
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.CAMERA",
+        "reason": "拍摄碑帖和古籍图片",
+        "usedScene": {
+          "abilities": ["MainAbility"],
+          "when": "inuse"
+        }
+      },
+      {
+        "name": "ohos.permission.READ_MEDIA",
+        "reason": "从相册选取待修复图片",
+        "usedScene": {
+          "abilities": ["MainAbility"],
+          "when": "always"
+        }
+      },
+      {
+        "name": "ohos.permission.WRITE_MEDIA",
+        "reason": "保存修复后的图片到相册",
+        "usedScene": {
+          "abilities": ["MainAbility"],
+          "when": "always"
+        }
+      },
+      {
+        "name": "ohos.permission.INTERNET",
+        "reason": "下载 AI 模型和同步修复数据",
+        "usedScene": {
+          "abilities": ["MainAbility"],
+          "when": "always"
+        }
+      },
+      {
+        "name": "ohos.permission.MODIFY_AUDIO_SETTINGS",
+        "reason": "触控反馈振动",
+        "usedScene": {
+          "abilities": ["MainAbility"],
+          "when": "inuse"
+        }
+      },
+      {
+        "name": "ohos.permission.VIBRATE",
+        "reason": "提供触控振动反馈",
+        "usedScene": {
+          "abilities": ["MainAbility"],
+          "when": "inuse"
+        }
+      }
+    ],
+
+    /* ========== Ability 声明 ========== */
+    "abilities": [
+      {
+        "name": "MainAbility",
+        "srcEntry": "./ets/MainAbility.ets",
+        "description": "墨迹时光主入口",
+        "icon": "$media:icon",
+        "label": "$string:app_name",
+        "startWindowIcon": "$media:icon",
+        "startWindowBackground": "#FFFFFF",
+        "exported": true,
+        "skills": [
+          {
+            "entities": ["entity.system.home"],
+            "actions": ["action.system.home"]
+          }
+        ]
+      }
+    ]
+  }
+}

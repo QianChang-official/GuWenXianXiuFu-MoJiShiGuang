@@ -1,0 +1,63 @@
+# Flutter
+.dart_tool/
+.packages
+.build/
+build/
+*.iml
+.fl-plugins
+.fl-plugins-dependencies
+*.freezed.dart
+*.g.dart
+*.gen.dart
+
+# Android
+android/.gradle/
+android/app/build/
+android/local.properties
+*.apk
+*.aab
+*.keystore
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Podfile.lock
+*.xcworkspace
+*.xcuserdata
+
+# HarmonyOS
+harmonyos/.preview/
+harmonyos/build/
+harmonyos/local.properties
+harmonyos/entry/build/
+
+# IDE
+.idea/
+.vscode/
+.workbuddy/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Assets
+assets/fonts/*.otf
+assets/fonts/*.ttf
+assets/models/*.onnx
+assets/models/*.tflite
+assets/models/*.mlmodelc
+assets/models/*.mslite
+
+# Others
+*.env
+.env.local

@@ -1,0 +1,30 @@
+{
+  /* ────────────────────────────────────────────────────────────────────────────
+     HarmonyOS 包配置文件
+     声明「墨迹时光」的 HarmonyOS 顶层包信息及依赖。
+     ──────────────────────────────────────────────────────────────────────────── */
+  "name": "mojishiguang",
+  "version": "1.0.0",
+  "description": "墨迹时光 - 碑帖古籍 AI 修复与识别",
+  "main": "",
+  "types": "",
+  "author": "qianchang",
+  "license": "MIT",
+
+  "dependencies": {
+    /* MindSpore Lite 推理引擎 */
+    "@ohos/mindspore-lite": "^2.0.0",
+
+    /* ArkUI 组件（系统提供，显式声明版本依赖） */
+    "@ohos.ability": "^1.0.0",
+    "@ohos.window": "^1.0.0",
+    "@ohos.multimedia.camera": "^1.0.0",
+    "@ohos.file.picker": "^1.0.0",
+    "@ohos.share": "^1.0.0"
+  },
+
+  "scripts": {
+    "build": "hvigor build",
+    "clean": "hvigor clean"
+  }
+}

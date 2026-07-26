@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ──────────────────────────────────────────────────────────────────────────────
+  Android 清单文件
+  声明「墨迹时光」所需的相机、存储、网络、NFC 等权限，
+  以及硬件加速支持。
+  ──────────────────────────────────────────────────────────────────────────────
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ===== 权限声明 ===== -->
+
+    <!-- 相机权限（碑帖拍摄） -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- 读取媒体库图片（Android 13+） -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- 读写外部存储（Android 12 及以下） -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- 网络访问（模型下载、数据同步） -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- 振动反馈 -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- NFC 近距离通信 -->
+    <uses-permission android:name="android.permission.NFC" />
+
+    <!-- 访问网络状态 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- ===== 硬件特性声明 ===== -->
+
+    <!-- 相机是可选特性（非相机设备也可运行） -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <!-- 自动对焦（文档扫描需要） -->
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+
+    <application
+        android:label="墨迹时光"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:hardwareAccelerated="true"
+        android:allowBackup="false"
+        android:theme="@style/LaunchTheme"
+        tools:targetApi="35">
+
+        <!-- Flutter 引擎入口 Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+
+            <!-- 主入口 -->
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 不要在此处添加 Meta-data 覆盖 Flutter 嵌入配置 -->
+
+    </application>
+</manifest>

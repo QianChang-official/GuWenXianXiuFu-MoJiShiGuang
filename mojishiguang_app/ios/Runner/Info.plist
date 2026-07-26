@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  ──────────────────────────────────────────────────────────────────────────────
+  iOS 应用信息配置文件
+  为「墨迹时光」配置相机权限、照片库权限、Metal 加速、ATS 等。
+  ──────────────────────────────────────────────────────────────────────────────
+-->
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+
+	<key>CFBundleDisplayName</key>
+	<string>墨迹时光</string>
+
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+
+	<key>CFBundleName</key>
+	<string>mojishiguang</string>
+
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+
+	<key>CFBundleSignature</key>
+	<string>????</string>
+
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+
+	<!-- ========== 相机权限 ========== -->
+	<key>NSCameraUsageDescription</key>
+	<string>墨迹时光需要使用相机拍摄碑帖和古籍进行修复与识别。</string>
+
+	<!-- ========== 照片库权限 ========== -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>墨迹时光需要访问照片库以选取需要修复的碑帖图片。</string>
+
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>墨迹时光需要保存修复后的图片到您的照片库。</string>
+
+	<!-- ========== UI 相关 ========== -->
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- ========== Metal / 图形加速 ========== -->
+	<key>MetalAPIValidation</key>
+	<true/>
+
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+		<string>metal</string>
+	</array>
+
+	<!-- ========== 应用传输安全（ATS） ========== -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<!-- 模型下载 CDN 允许非 HTTPS 加载（开发阶段） -->
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
+
+	<!-- ========== 后台模式 ========== -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<!-- 模型下载可在后台继续 -->
+		<string>fetch</string>
+	</array>
+
+	<!-- Flutter 嵌入配置 -->
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
+</dict>
+</plist>

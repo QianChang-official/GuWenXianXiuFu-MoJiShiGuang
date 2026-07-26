@@ -1,0 +1,225 @@
+/// 「墨迹时光」知识图谱模块 — 集成论文技术清单
+///
+/// 本文件列出项目中复现/集成的所有知识图谱与图神经网络领域前沿论文。
+/// 总计：25 篇
+
+class KgPaperEntry {
+  final String title;
+  final String authors;
+  final int year;
+  final String venue;
+  final String method;
+  final String application;
+
+  const KgPaperEntry({
+    required this.title,
+    required this.authors,
+    required this.year,
+    required this.venue,
+    required this.method,
+    required this.application,
+  });
+}
+
+const List<KgPaperEntry> kgPapers = [
+  KgPaperEntry(
+    title: 'TransE — Translating Embeddings for Modeling Multi-relational Data',
+    authors: 'Bordes et al.',
+    year: 2013,
+    venue: 'NeurIPS 2013',
+    method: '将关系建模为嵌入空间中的平移操作 (h + r ≈ t)，知识图谱嵌入奠基性工作',
+    application: '碑帖知识图谱的基础实体关系嵌入',
+  ),
+  KgPaperEntry(
+    title: 'TransH — Knowledge Graph Embedding on Hyperplanes',
+    authors: 'Wang et al.',
+    year: 2014,
+    venue: 'AAAI 2014',
+    method: '引入关系超平面，解决TransE在1-N/N-1/对称关系上的局限',
+    application: '处理碑帖中一对多关系（一书多作者）',
+  ),
+  KgPaperEntry(
+    title: 'TransR — Learning Entity and Relation Embeddings for Knowledge Graph',
+    authors: 'Lin et al.',
+    year: 2015,
+    venue: 'AAAI 2015',
+    method: '实体空间到关系空间的投影矩阵，不同关系有不同语义空间',
+    application: '碑帖中官职、地名等不同语义空间的实体建模',
+  ),
+  KgPaperEntry(
+    title: 'RotatE — Knowledge Graph Embedding by Relational Rotation',
+    authors: 'Sun et al.',
+    year: 2019,
+    venue: 'ICLR 2019',
+    method: '复数空间中的旋转操作建模关系，支持对称/反对称/互逆/组合关系',
+    application: '支持碑帖知识图谱的复杂关系推理',
+  ),
+  KgPaperEntry(
+    title: 'DistMult — Embedding Entities and Relations for Learning and Inference',
+    authors: 'Yang et al.',
+    year: 2014,
+    venue: 'ICLR 2015',
+    method: '双线性对角嵌入模型，计算效率极高的简单基线',
+    application: '大规模碑帖图谱的快速推理',
+  ),
+  KgPaperEntry(
+    title: 'ComplEx — Complex Embeddings for Simple Link Prediction',
+    authors: 'Trouillon et al.',
+    year: 2016,
+    venue: 'ICML 2016',
+    method: '复数域嵌入，利用复共轭建模非对称关系',
+    application: '碑帖中非对称关系的精确建模',
+  ),
+  KgPaperEntry(
+    title: 'ConvE — Convolutional 2D Knowledge Graph Embeddings',
+    authors: 'Dettmers et al.',
+    year: 2018,
+    venue: 'AAAI 2018',
+    method: '2D卷积在嵌入上滑动，提取深层次交互特征',
+    application: '碑帖实体间深层次语义关联挖掘',
+  ),
+  KgPaperEntry(
+    title: 'ConvR — Adaptive Convolution for Knowledge Graph Embeddings',
+    authors: 'Jiang et al.',
+    year: 2019,
+    venue: 'AAAI 2019',
+    method: '关系自适应的卷积核，为不同关系生成不同的卷积模式',
+    application: '自适应不同关系的语义提取',
+  ),
+  KgPaperEntry(
+    title: 'R-GCN — Modeling Relational Data with Graph Convolutional Networks',
+    authors: 'Schlichtkrull et al.',
+    year: 2018,
+    venue: 'ESWC 2018',
+    method: '关系图卷积网络，为每条边类型分别定义变换矩阵',
+    application: '碑帖知识图谱的节点特征传播',
+  ),
+  KgPaperEntry(
+    title: 'GraphSAGE — Inductive Representation Learning on Large Graphs',
+    authors: 'Hamilton et al.',
+    year: 2017,
+    venue: 'NeurIPS 2017',
+    method: '归纳式图学习，对未见节点也能生成嵌入，邻域采样策略',
+    application: '新碑帖内容动态加入知识图谱时的泛化推理',
+  ),
+  KgPaperEntry(
+    title: 'GAT — Graph Attention Networks',
+    authors: 'Veličković et al.',
+    year: 2018,
+    venue: 'ICLR 2018',
+    method: '自注意力机制聚合邻域特征，为不同邻居学习不同权重',
+    application: '碑帖知识图谱中重要实体/关系的自动加权',
+  ),
+  KgPaperEntry(
+    title: 'GATv2 — How Attentive are Graph Attention Networks?',
+    authors: 'Brody et al.',
+    year: 2022,
+    venue: 'ICLR 2022',
+    method: '动态图注意力，解决了原始GAT的静态注意力限制',
+    application: '更灵活的碑帖节点关系学习',
+  ),
+  KgPaperEntry(
+    title: 'CompGCN — Composition-based Multi-Relational Graph Convolutional Networks',
+    authors: 'Vashishth et al.',
+    year: 2020,
+    venue: 'ICLR 2020',
+    method: '组合操作(平移/旋转)与GCN融合，实体关系联合嵌入',
+    application: '碑帖实体与关系的联合表示学习',
+  ),
+  KgPaperEntry(
+    title: 'TuckER — Tensor Factorization for Knowledge Graph Completion',
+    authors: 'Balazevic et al.',
+    year: 2019,
+    venue: 'AAAI 2019',
+    method: 'Tucker张量分解用于知识图谱，核心张量捕获实体-关系交互',
+    application: '碑帖知识图谱补全（缺失关系预测）',
+  ),
+  KgPaperEntry(
+    title: 'QuatE — Quaternion Knowledge Graph Embeddings',
+    authors: 'Zhang et al.',
+    year: 2019,
+    venue: 'AAAI 2019',
+    method: '四元数空间嵌入，旋转操作建模关系，支持多类型关系模式',
+    application: '高效的碑帖图谱关系建模',
+  ),
+  KgPaperEntry(
+    title: 'PairRE — Knowledge Graph Embedding via Paired Relation Vectors',
+    authors: 'Chao et al.',
+    year: 2021,
+    venue: 'ACL 2021',
+    method: '成对关系向量（分头/尾），灵活建模复杂关系模式',
+    application: '碑帖中方向性关系的精确建模',
+  ),
+  KgPaperEntry(
+    title: 'KBGAN — Adversarial Learning for Knowledge Graph Embeddings',
+    authors: 'Cai et al.',
+    year: 2018,
+    venue: 'NAACL 2018',
+    method: '对抗训练框架选择高质量负样本，提升嵌入质量',
+    application: '碑帖图谱嵌入训练的负样本优化',
+  ),
+  KgPaperEntry(
+    title: 'ERNIE — Enhanced Language Representation with Informative Entities',
+    authors: 'Zhang et al.',
+    year: 2019,
+    venue: 'ACL 2019',
+    method: 'BERT预训练 + 知识图谱实体融合的增强语言表示',
+    application: '碑帖文本中的实体识别与消歧',
+  ),
+  KgPaperEntry(
+    title: 'KG-BERT — BERT for Knowledge Graph Completion',
+    authors: 'Yao et al.',
+    year: 2019,
+    venue: 'EMNLP 2019',
+    method: '将三元组转为BERT输入序列并微调，三元组分类/链接预测',
+    application: '碑帖实体关系的语义级推理',
+  ),
+  KgPaperEntry(
+    title: 'RE-NET — Recurrent Event Network for Temporal Knowledge Graph',
+    authors: 'Jin et al.',
+    year: 2020,
+    venue: 'ICLR 2020',
+    method: '循环事件网络建模时序知识图谱，预测未来事件',
+    application: '碑帖人物/事件的时间线推理与预测',
+  ),
+  KgPaperEntry(
+    title: 'TGN — Temporal Graph Networks',
+    authors: 'Rossi et al.',
+    year: 2020,
+    venue: 'NeurIPS 2020',
+    method: '时序图网络框架，支持动态图的表示学习',
+    application: '碑帖知识在时间轴上的演化分析',
+  ),
+  KgPaperEntry(
+    title: 'HGT — Heterogeneous Graph Transformer',
+    authors: 'Hu et al.',
+    year: 2020,
+    venue: 'WWW 2020',
+    method: '异构图Transformer，元关系参数化的自注意力',
+    application: '不同实体类型（人物/地名/官职/典籍）的异构关系建模',
+  ),
+  KgPaperEntry(
+    title: 'SimplE — Simple Embedding for Link Prediction in Knowledge Graphs',
+    authors: 'Kazemi et al.',
+    year: 2018,
+    venue: 'AAAI 2018',
+    method: '简化但表达力强的嵌入模型，两个独立嵌入向量的规范多线性',
+    application: '轻量高效的端侧图谱推理',
+  ),
+  KgPaperEntry(
+    title: 'KnowFormer — Revisiting Transformer for Knowledge Graph Reasoning',
+    authors: 'Zhu et al.',
+    year: 2023,
+    venue: 'AAAI 2023',
+    method: 'Transformer架构的知识图谱推理，路径感知的自注意力',
+    application: '碑帖图谱的多跳推理与路径发现',
+  ),
+  KgPaperEntry(
+    title: 'NodePiece — Compositional Tokenization for Knowledge Graphs',
+    authors: 'Galkin et al.',
+    year: 2022,
+    venue: 'NeurIPS 2022',
+    method: '知识图谱的分词令牌化方法，将实体分解为原子子结构的组合',
+    application: '大规模碑帖图谱的高效嵌入表示',
+  ),
+];

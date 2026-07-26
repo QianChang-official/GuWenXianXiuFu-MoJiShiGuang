@@ -1,0 +1,22 @@
+// -----------------------------------------------------------------------------
+// Android 项目级设置
+// -----------------------------------------------------------------------------
+
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "mojishiguang"
+include(":app")
