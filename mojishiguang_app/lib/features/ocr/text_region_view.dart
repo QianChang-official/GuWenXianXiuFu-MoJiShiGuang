@@ -117,22 +117,21 @@ class _TextRegionViewState extends ConsumerState<TextRegionView> {
           // 文字标签开关
           IconButton(
             icon: Icon(
-              _showTextLabels ? Icons.text_fields : Icons.text_fields_outlined,
+              _showTextLabels ? Icons.text_fields : Icons.text_format,
             ),
             tooltip: '文字标注',
-            onPressed: () =>
-                setState(() => _showTextLabels = !_showTextLabels),
+            onPressed: () => setState(() => _showTextLabels = !_showTextLabels),
           ),
           // 置信度热力图开关
           IconButton(
             icon: Icon(
               _showConfidenceHeatmap
-                  ? Icons.heat_pump
-                  : Icons.heat_pump_outlined,
+                  ? Icons.local_fire_department
+                  : Icons.thermostat,
             ),
             tooltip: '置信度热力图',
-            onPressed: () =>
-                setState(() => _showConfidenceHeatmap = !_showConfidenceHeatmap),
+            onPressed: () => setState(
+                () => _showConfidenceHeatmap = !_showConfidenceHeatmap),
           ),
         ],
       ),
@@ -151,20 +150,22 @@ class _TextRegionViewState extends ConsumerState<TextRegionView> {
                   backgroundDecoration: const BoxDecoration(
                     color: Color(0xFF1A1A1A),
                   ),
-                  customPaint: CustomPaint(
-                    painter: _RegionOverlayPainter(
-                      regions: state.detectedRegions,
-                      selectedRegionId: _selectedRegionId,
-                      showTextLabels: _showTextLabels,
-                      showConfidenceHeatmap: _showConfidenceHeatmap,
+                ),
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: _RegionOverlayPainter(
+                        regions: state.detectedRegions,
+                        selectedRegionId: _selectedRegionId,
+                        showTextLabels: _showTextLabels,
+                        showConfidenceHeatmap: _showConfidenceHeatmap,
+                      ),
                     ),
-                    size: Size.infinite,
                   ),
                 ),
 
                 // 区域信息弹出层
-                if (_selectedRegionId != null)
-                  _buildSelectedRegionInfo(state),
+                if (_selectedRegionId != null) _buildSelectedRegionInfo(state),
               ],
             ),
           ),
@@ -182,11 +183,16 @@ class _TextRegionViewState extends ConsumerState<TextRegionView> {
 
   /// 构建选中区域的详情信息覆盖层
   Widget _buildSelectedRegionInfo(OcrState state) {
-    final TextRegion? region = state.detectedRegions
-        .where((r) => r.id == _selectedRegionId)
-        .firstOrNull;
+    TextRegion? region;
+    for (final TextRegion candidate in state.detectedRegions) {
+      if (candidate.id == _selectedRegionId) {
+        region = candidate;
+        break;
+      }
+    }
 
     if (region == null) return const SizedBox.shrink();
+    final selectedRegion = region;
 
     return Positioned(
       left: 16,
@@ -206,30 +212,31 @@ class _TextRegionViewState extends ConsumerState<TextRegionView> {
                     width: 12,
                     height: 12,
                     decoration: BoxDecoration(
-                      color: _confidenceColor(region.confidence),
+                      color: _confidenceColor(selectedRegion.confidence),
                       shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '区域 #${region.sortOrder}',
+                    '区域 #${selectedRegion.sortOrder}',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const Spacer(),
                   Text(
-                    '置信度: ${(region.confidence * 100).toInt()}%',
+                    '置信度: ${(selectedRegion.confidence * 100).toInt()}%',
                     style: TextStyle(
                       fontSize: 12,
-                      color: _confidenceColor(region.confidence),
+                      color: _confidenceColor(selectedRegion.confidence),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              if (region.text != null && region.text!.isNotEmpty) ...[
+              if (selectedRegion.text case final text?
+                  when text.isNotEmpty) ...[
                 Text(
-                  '识别文字: ${region.text}',
+                  '识别文字: $text',
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 4),
@@ -237,10 +244,13 @@ class _TextRegionViewState extends ConsumerState<TextRegionView> {
               Wrap(
                 spacing: 8,
                 children: [
-                  _infoChip('位置', '(${(region.x * 100).toInt()}, ${(region.y * 100).toInt()})'),
-                  _infoChip('大小', '${(region.width * 100).toInt()}×${(region.height * 100).toInt()}'),
-                  _infoChip('方向', region.isVertical ? '竖排' : '横排'),
-                  _infoChip('旋转', '${(region.rotation * 180 / pi).toInt()}°'),
+                  _infoChip('位置',
+                      '(${(selectedRegion.x * 100).toInt()}, ${(selectedRegion.y * 100).toInt()})'),
+                  _infoChip('大小',
+                      '${(selectedRegion.width * 100).toInt()}×${(selectedRegion.height * 100).toInt()}'),
+                  _infoChip('方向', selectedRegion.isVertical ? '竖排' : '横排'),
+                  _infoChip(
+                      '旋转', '${(selectedRegion.rotation * 180 / pi).toInt()}°'),
                 ],
               ),
               const SizedBox(height: 8),
@@ -250,14 +260,13 @@ class _TextRegionViewState extends ConsumerState<TextRegionView> {
                   TextButton.icon(
                     icon: const Icon(Icons.close, size: 16),
                     label: const Text('关闭'),
-                    onPressed: () =>
-                        setState(() => _selectedRegionId = null),
+                    onPressed: () => setState(() => _selectedRegionId = null),
                   ),
-                  if (region.text != null && region.text!.isNotEmpty)
+                  if (selectedRegion.text case final text? when text.isNotEmpty)
                     TextButton.icon(
                       icon: const Icon(Icons.search, size: 16),
                       label: const Text('查看详情'),
-                      onPressed: () => _openCharacterDetail(region.text!),
+                      onPressed: () => _openCharacterDetail(text),
                     ),
                 ],
               ),
@@ -290,9 +299,8 @@ class _TextRegionViewState extends ConsumerState<TextRegionView> {
   /// 构建检测统计信息栏
   Widget _buildStatsBar(OcrState state) {
     final int total = state.detectedRegions.length;
-    final int high = state.detectedRegions
-        .where((r) => r.confidence >= 0.8)
-        .length;
+    final int high =
+        state.detectedRegions.where((r) => r.confidence >= 0.8).length;
     final int mid = state.detectedRegions
         .where((r) => r.confidence >= 0.5 && r.confidence < 0.8)
         .length;
@@ -308,7 +316,7 @@ class _TextRegionViewState extends ConsumerState<TextRegionView> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -319,7 +327,7 @@ class _TextRegionViewState extends ConsumerState<TextRegionView> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _statItem(Icons.lines, '$total 行', '检测总数'),
+            _statItem(Icons.format_line_spacing, '$total 行', '检测总数'),
             _statItem(Icons.check_circle, '$high 高', '高置信度'),
             _statItem(Icons.warning_amber, '$mid 中', '中置信度'),
             _statItem(Icons.error, '$low 低', '低置信度'),
@@ -440,7 +448,7 @@ class _RegionOverlayPainter extends CustomPainter {
 
       // 绘制半透明填充
       final Paint fillPaint = Paint()
-        ..color = boxColor.withValues(alpha: isSelected ? 0.3 : 0.15)
+        ..color = boxColor.withOpacity(isSelected ? 0.3 : 0.15)
         ..style = PaintingStyle.fill;
       canvas.drawRect(rect, fillPaint);
 
@@ -459,11 +467,15 @@ class _RegionOverlayPainter extends CustomPainter {
           ..strokeWidth = 4.0;
         const double cornerLen = 20.0;
         // 左上角
-        canvas.drawLine(rect.topLeft, rect.topLeft + Offset(cornerLen, 0), cornerPaint);
-        canvas.drawLine(rect.topLeft, rect.topLeft + Offset(0, cornerLen), cornerPaint);
+        canvas.drawLine(
+            rect.topLeft, rect.topLeft + Offset(cornerLen, 0), cornerPaint);
+        canvas.drawLine(
+            rect.topLeft, rect.topLeft + Offset(0, cornerLen), cornerPaint);
         // 右下角
-        canvas.drawLine(rect.bottomRight, rect.bottomRight - Offset(cornerLen, 0), cornerPaint);
-        canvas.drawLine(rect.bottomRight, rect.bottomRight - Offset(0, cornerLen), cornerPaint);
+        canvas.drawLine(rect.bottomRight,
+            rect.bottomRight - Offset(cornerLen, 0), cornerPaint);
+        canvas.drawLine(rect.bottomRight,
+            rect.bottomRight - Offset(0, cornerLen), cornerPaint);
       }
 
       // 绘制文字标签
@@ -477,11 +489,11 @@ class _RegionOverlayPainter extends CustomPainter {
               fontWeight: FontWeight.w600,
               shadows: [
                 Shadow(
-                  color: Colors.black.withValues(alpha: 0.8),
+                  color: Colors.black.withOpacity(0.8),
                   blurRadius: 4,
                 ),
                 Shadow(
-                  color: Colors.black.withValues(alpha: 0.8),
+                  color: Colors.black.withOpacity(0.8),
                   blurRadius: 2,
                 ),
               ],
@@ -501,7 +513,7 @@ class _RegionOverlayPainter extends CustomPainter {
         if (labelRect.top >= 0) {
           canvas.drawRRect(
             RRect.fromRectAndRadius(labelRect, const Radius.circular(4)),
-            Paint()..color = boxColor.withValues(alpha: 0.8),
+            Paint()..color = boxColor.withOpacity(0.8),
           );
         }
 
@@ -521,7 +533,7 @@ class _RegionOverlayPainter extends CustomPainter {
             fontWeight: FontWeight.w500,
             shadows: [
               Shadow(
-                color: Colors.black.withValues(alpha: 0.7),
+                color: Colors.black.withOpacity(0.7),
                 blurRadius: 3,
               ),
             ],
@@ -531,7 +543,8 @@ class _RegionOverlayPainter extends CustomPainter {
       )..layout();
       indexPainter.paint(
         canvas,
-        Offset(rect.right - indexPainter.size.width - 4, rect.bottom - indexPainter.size.height - 2),
+        Offset(rect.right - indexPainter.size.width - 4,
+            rect.bottom - indexPainter.size.height - 2),
       );
     }
   }
@@ -570,12 +583,3 @@ class _RegionOverlayPainter extends CustomPainter {
     }
   }
 }
-
-/// 高置信度区域颜色
-const Color _highConfColor = Color(0xFF4CAF50);
-
-/// 中置信度区域颜色
-const Color _midConfColor = Color(0xFFFFC107);
-
-/// 低置信度区域颜色
-const Color _lowConfColor = Color(0xFFF44336);

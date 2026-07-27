@@ -77,7 +77,10 @@
             </intent-filter>
         </activity>
 
-        <!-- 不要在此处添加 Meta-data 覆盖 Flutter 嵌入配置 -->
+        <!-- 声明使用 Flutter Android v2 embedding。 -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
 
     </application>
 </manifest>

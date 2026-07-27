@@ -19,7 +19,7 @@ dependencies:
 
   # 网络请求
   dio: ^5.4.0
-  retrofit: ^4.1.0
+  retrofit: '>=4.6.0 <4.9.0'
 
   # 本地存储
   drift: ^2.16.0
@@ -29,7 +29,7 @@ dependencies:
 
   # 数据模型
   freezed_annotation: ^2.4.0
-  json_annotation: ^4.8.0
+  json_annotation: ^4.9.0
 
   # 图像处理
   image_picker: ^1.0.0
@@ -47,15 +47,15 @@ dependencies:
   flutter_staggered_animations: ^1.1.0
 
   # 分享与导出
-  share_plus: ^10.0.0
+  share_plus: ^12.0.2
   screenshot: ^2.1.0
   path: ^1.9.0
 
   # 平台工具
   permission_handler: ^11.3.0
-  device_info_plus: ^11.0.0
-  package_info_plus: ^9.0.1
-  connectivity_plus: ^6.0.0
+  device_info_plus: ^10.1.2
+  package_info_plus: ^8.3.1
+  connectivity_plus: ^6.0.5
 
   # 国际化
   flutter_localizations:
@@ -92,12 +92,3 @@ flutter:
     - assets/images/
     - assets/models/
     - assets/animations/
-
-  fonts:
-    - family: SourceHanSerifSC
-      fonts:
-        - asset: assets/fonts/SourceHanSerifSC-Regular.otf
-        - asset: assets/fonts/SourceHanSerifSC-Bold.otf
-          weight: 700
-        - asset: assets/fonts/SourceHanSerifSC-ExtraLight.otf
-          weight: 200

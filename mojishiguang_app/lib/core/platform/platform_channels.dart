@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'platform_channels.freezed.dart';
+part 'platform_channels.g.dart';
 
 /// 平台通道管理器。
 /// 所有与原生平台的通信均应通过此类中转，避免在各业务模块中
@@ -129,11 +130,11 @@ class DeviceCapabilities with _$DeviceCapabilities {
   const factory DeviceCapabilities({
     required bool hasGPU,
     required bool hasNPU,
-    required String gpuVendor,    // apple / mali / adreno / arm
-    required String npuType,      // neuralEngine / mindspore / nnapi
+    required String gpuVendor, // apple / mali / adreno / arm
+    required String npuType, // neuralEngine / mindspore / nnapi
     required int maxThreads,
     required double totalMemoryGB,
-    required String osType,       // ios / android / harmonyos
+    required String osType, // ios / android / harmonyos
   }) = _DeviceCapabilities;
 
   factory DeviceCapabilities.fromJson(Map<String, dynamic> json) =>

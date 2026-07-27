@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../core/utils/json_converters.dart';
 import 'restoration_method.dart';
 
 part 'restored_image.freezed.dart';
@@ -43,10 +44,10 @@ class RestoredImage with _$RestoredImage {
     required DateTime createdAt,
 
     /// 修复后图片字节（可选，用于内存缓存）
-    Uint8List? imageBytes,
+    @NullableUint8ListConverter() Uint8List? imageBytes,
 
     /// 可信度热力图字节（可选）
-    Uint8List? confidenceHeatmap,
+    @NullableUint8ListConverter() Uint8List? confidenceHeatmap,
   }) = _RestoredImage;
 
   factory RestoredImage.fromJson(Map<String, dynamic> json) =>

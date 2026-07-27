@@ -7,25 +7,26 @@ import '../models/restoration/input_image.dart';
 import '../models/restoration/restoration_method.dart';
 import '../models/restoration/quality_metrics.dart';
 import '../services/api/restoration_api.dart';
+import '../services/api/restoration_methods.dart';
 
 part 'restoration_provider.freezed.dart';
 
 /// 修复流程步骤枚举
 enum RestorationStep {
-  selectImage,    // 选择图片
-  detectDamage,   // 破损检测
-  selectMethod,   // 选择修复方法
-  restoring,      // AI修复中
-  evaluating,     // 质量评估
-  complete,       // 完成展示
+  selectImage, // 选择图片
+  detectDamage, // 破损检测
+  selectMethod, // 选择修复方法
+  restoring, // AI修复中
+  evaluating, // 质量评估
+  complete, // 完成展示
 }
 
 /// 对比模式枚举
 enum ComparisonMode {
   sideBySide, // 并排对比
-  overlay,    // 叠加对比
-  slider,     // 滑块对比
-  grid,       // 网格对比
+  overlay, // 叠加对比
+  slider, // 滑块对比
+  grid, // 网格对比
 }
 
 /// 修复流程完整状态
@@ -69,20 +70,23 @@ class RestorationState with _$RestorationState {
     required List<RestorationHistoryEntry> history,
   }) = _RestorationState;
 
-  factory RestorationState.initial() => const RestorationState(
-        inputImage: null,
-        damageMask: null,
-        restoredResults: [],
-        currentStep: RestorationStep.selectImage,
-        progress: 0.0,
-        isProcessing: false,
-        errorMessage: null,
-        selectedMethod: RestorationMethod.lama,
-        availableMethods: RestorationMethod.values,
-        comparisonMode: ComparisonMode.slider,
-        metrics: null,
-        history: [],
-      );
+  factory RestorationState.initial() {
+    final methods = supportedMethods;
+    return RestorationState(
+      inputImage: null,
+      damageMask: null,
+      restoredResults: const [],
+      currentStep: RestorationStep.selectImage,
+      progress: 0.0,
+      isProcessing: false,
+      errorMessage: null,
+      selectedMethod: methods.first,
+      availableMethods: methods,
+      comparisonMode: ComparisonMode.slider,
+      metrics: null,
+      history: const [],
+    );
+  }
 }
 
 /// 修复历史记录
@@ -180,11 +184,7 @@ class RestorationNotifier extends Notifier<RestorationState> {
   /// 4. 执行 AI 修复
   ///
   /// 支持多种修复方法（集成多篇论文）:
-  /// - [RestorationMethod.lama]: LaMA 傅里叶卷积修复
-  /// - [RestorationMethod.mat]: MAT Transformer 修复
-  /// - [RestorationMethod.deepfill]: DeepFill v2 门控卷积
-  /// - [RestorationMethod.repaint]: RePaint 扩散模型
-  /// - [RestorationMethod.edgeConnect]: Edge-Connect 边缘引导
+  /// 支持 LaMA、MAT、DeepFill v2、RePaint、Edge-Connect 等方法。
   Future<void> restoreWithMethod(RestorationMethod method) async {
     if (state.inputImage == null || state.damageMask == null) return;
 
@@ -278,17 +278,23 @@ class RestorationNotifier extends Notifier<RestorationState> {
     }
   }
 
-  /// 7. 切换对比模式
+  /// 7. 跳转到指定工作流步骤
+  void goToStep(RestorationStep step) {
+    if (state.isProcessing) return;
+    state = state.copyWith(currentStep: step);
+  }
+
+  /// 8. 切换对比模式
   void toggleComparisonMode(ComparisonMode mode) {
     state = state.copyWith(comparisonMode: mode);
   }
 
-  /// 8. 重置全部状态
+  /// 9. 重置全部状态
   void reset() {
     state = RestorationState.initial();
   }
 
-  /// 9. 清除错误
+  /// 10. 清除错误
   void clearError() {
     state = state.copyWith(errorMessage: null);
   }

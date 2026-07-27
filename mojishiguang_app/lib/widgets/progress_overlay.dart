@@ -93,7 +93,8 @@ class _ProgressOverlayState extends State<ProgressOverlay>
                           height: 48,
                           child: CircularProgressIndicator(
                             strokeWidth: 3.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFC04040)),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFFC04040)),
                           ),
                         ),
                       );
@@ -120,7 +121,8 @@ class _ProgressOverlayState extends State<ProgressOverlay>
                       child: LinearProgressIndicator(
                         value: widget.progress,
                         backgroundColor: const Color(0xFFE8E8E8),
-                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFC04040)),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFFC04040)),
                         minHeight: 6,
                       ),
                     ),
@@ -143,7 +145,7 @@ class _ProgressOverlayState extends State<ProgressOverlay>
                         onPressed: widget.onCancel,
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.red,
-                          side: BorderSide(color: Colors.red.withValues(alpha: 0.5)),
+                          side: BorderSide(color: Colors.red.withOpacity(0.5)),
                         ),
                         child: const Text('取消'),
                       ),
@@ -190,7 +192,9 @@ class _ProgressOverlayState extends State<ProgressOverlay>
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: isCurrent ? Colors.white : const Color(0xFF999999),
+                          color: isCurrent
+                              ? Colors.white
+                              : const Color(0xFF999999),
                         ),
                       ),
               ),

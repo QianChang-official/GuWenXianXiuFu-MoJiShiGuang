@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../core/utils/json_converters.dart';
 import 'damage_mask.dart';
 import 'restored_image.dart';
 
@@ -13,7 +14,7 @@ part 'restoration_result.g.dart';
 class RestorationResult with _$RestorationResult {
   const factory RestorationResult({
     /// 原始图片字节
-    required Uint8List originalImageBytes,
+    @Uint8ListConverter() required Uint8List originalImageBytes,
 
     /// 原始图片宽度
     required int originalWidth,

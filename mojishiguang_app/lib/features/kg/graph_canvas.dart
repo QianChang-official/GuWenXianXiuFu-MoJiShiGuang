@@ -161,8 +161,7 @@ class _GraphCanvasStatefulState extends State<GraphCanvas>
         final delta = pos1 - pos2;
         final distance = delta.distance.clamp(1.0, 500.0);
         final repulsion = _kRepulsionStrength / (distance * distance);
-        forces[entity.id] = forces[entity.id]! +
-            delta * (repulsion / distance);
+        forces[entity.id] = forces[entity.id]! + delta * (repulsion / distance);
       }
 
       // 弹簧引力（边连接节点）
@@ -178,8 +177,8 @@ class _GraphCanvasStatefulState extends State<GraphCanvas>
           final delta = target - pos;
           final distance = delta.distance.clamp(1.0, 500.0);
           final attraction = _kSpringStiffness * (distance - 100.0);
-          forces[entity.id] = forces[entity.id]! +
-              delta * (attraction / distance);
+          forces[entity.id] =
+              forces[entity.id]! + delta * (attraction / distance);
         }
       }
 
@@ -233,7 +232,8 @@ class _GraphCanvasStatefulState extends State<GraphCanvas>
           ? _kNodeRadiusSelected
           : _kNodeRadius;
       // 加上缩放补偿
-      if (distance < (hitRadius + 8) * (1.0 / _canvasState.scale).clamp(0.5, 2.0)) {
+      if (distance <
+          (hitRadius + 8) * (1.0 / _canvasState.scale).clamp(0.5, 2.0)) {
         return entity;
       }
     }
@@ -255,14 +255,11 @@ class _GraphCanvasStatefulState extends State<GraphCanvas>
         onScaleUpdate: (details) {
           if (_canvasState.draggingNodeId != null) {
             // 拖拽节点
-            final entityId = widget
-                .graph.entities[_canvasState.draggingNodeId!]
-                .id;
-            final positions =
-                Map<String, Offset>.from(widget.nodePositions);
+            final entityId =
+                widget.graph.entities[_canvasState.draggingNodeId!].id;
+            final positions = Map<String, Offset>.from(widget.nodePositions);
             final delta = details.focalPointDelta;
-            positions[entityId] =
-                (positions[entityId] ?? Offset.zero) + delta;
+            positions[entityId] = (positions[entityId] ?? Offset.zero) + delta;
             widget.onNodeDrag?.call(entityId, positions[entityId]!);
             setState(() {
               // 更新节点的位置映射
@@ -271,8 +268,10 @@ class _GraphCanvasStatefulState extends State<GraphCanvas>
             // 双指缩放/平移
             final scaleDelta = details.scale;
             setState(() {
-              _canvasState.scale =
-                  (_canvasState.lastScale! * scaleDelta).clamp(0.3, 3.0);
+              _canvasState.scale = (_canvasState.lastScale! * scaleDelta).clamp(
+                0.3,
+                3.0,
+              );
               final base = _canvasState.panOffset;
               final focal = details.localFocalPoint;
               _canvasState.panOffset = focal -
@@ -290,7 +289,7 @@ class _GraphCanvasStatefulState extends State<GraphCanvas>
             widget.onNodeTap?.call(hit.id);
           }
         },
-        onDoubleTap: (details) {
+        onDoubleTapDown: (details) {
           final hit = _hitTest(details.localPosition);
           if (hit != null) {
             widget.onNodeDoubleTap?.call(hit.id);
@@ -315,8 +314,10 @@ class _GraphCanvasStatefulState extends State<GraphCanvas>
               nodePositions: widget.nodePositions,
               selectedEntityId: widget.selectedEntityId,
               panOffset: _canvasState.panOffset +
-                  Offset(MediaQuery.of(context).size.width / 2,
-                      MediaQuery.of(context).size.height / 2),
+                  Offset(
+                    MediaQuery.of(context).size.width / 2,
+                    MediaQuery.of(context).size.height / 2,
+                  ),
               scale: _canvasState.scale,
               fixedNodes: _canvasState.fixedNodes,
             ),
@@ -336,7 +337,7 @@ class _GraphCanvasStatefulState extends State<GraphCanvas>
 ///
 /// 使用 CustomPainter 高性能绘制知识图谱。
 /// 绘制顺序：边 → 节点 → 标签 → 选中高亮 → 额外装饰
-/// 
+///
 /// 性能优化：
 /// - shouldRepaint 仅数据变化时重绘
 /// - 跳过视口外节点的绘制（虚拟化）
@@ -387,9 +388,11 @@ class _GraphPainter extends CustomPainter {
           (relation.headId == selectedEntityId ||
               relation.tailId == selectedEntityId);
 
-      edgePaint.color = _relationColor(relation.type)
-          .withValues(alpha: isHighlighted ? 0.9 : 0.35);
-      edgePaint.strokeWidth = (isHighlighted ? 2.5 : 1.5) * scale.clamp(0.5, 2.0);
+      edgePaint.color = _relationColor(
+        relation.type,
+      ).withOpacity(isHighlighted ? 0.9 : 0.35);
+      edgePaint.strokeWidth =
+          (isHighlighted ? 2.5 : 1.5) * scale.clamp(0.5, 2.0);
 
       // 绘制贝塞尔曲线
       _drawCurvedEdge(canvas, headPos, tailPos, relation, edgePaint);
@@ -440,7 +443,7 @@ class _GraphPainter extends CustomPainter {
         pos,
         radius * scale,
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.8)
+          ..color = Colors.white.withOpacity(0.8)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0,
       );
@@ -450,7 +453,7 @@ class _GraphPainter extends CustomPainter {
         canvas.drawCircle(
           pos,
           (radius * 0.4) * scale,
-          Paint()..color = Colors.white.withValues(alpha: 0.9),
+          Paint()..color = Colors.white.withOpacity(0.9),
         );
       }
     }
@@ -491,10 +494,7 @@ class _GraphPainter extends CustomPainter {
     Relation relation,
     Paint paint,
   ) {
-    final mid = Offset(
-      (from.dx + to.dx) / 2,
-      (from.dy + to.dy) / 2,
-    );
+    final mid = Offset((from.dx + to.dx) / 2, (from.dy + to.dy) / 2);
     // 计算垂直于两点连线方向的偏移
     final dx = to.dx - from.dx;
     final dy = to.dy - from.dy;
@@ -504,10 +504,7 @@ class _GraphPainter extends CustomPainter {
     final ny = dx / len;
     // 曲线控制点偏移（弧线凸起高度）
     final curveOffset = (len * 0.08).clamp(10.0, 80.0);
-    final cp = Offset(
-      mid.dx + nx * curveOffset,
-      mid.dy + ny * curveOffset,
-    );
+    final cp = Offset(mid.dx + nx * curveOffset, mid.dy + ny * curveOffset);
 
     final path = Path()
       ..moveTo(from.dx, from.dy)
@@ -567,26 +564,20 @@ class _GraphPainter extends CustomPainter {
 
     // 标签背景
     final bgRect = Rect.fromCenter(
-      center: Offset(
-        position.dx,
-        position.dy + 2,
-      ),
+      center: Offset(position.dx, position.dy + 2),
       width: textPainter.width + 10,
       height: textPainter.height + 4,
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(bgRect, const Radius.circular(4)),
       Paint()
-        ..color = Colors.white.withValues(alpha: 0.85)
+        ..color = Colors.white.withOpacity(0.85)
         ..style = PaintingStyle.fill,
     );
 
     textPainter.paint(
       canvas,
-      Offset(
-        position.dx - textPainter.width / 2,
-        position.dy,
-      ),
+      Offset(position.dx - textPainter.width / 2, position.dy),
     );
   }
 

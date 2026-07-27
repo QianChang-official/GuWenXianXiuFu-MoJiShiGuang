@@ -13,8 +13,13 @@
 /// - PhotoWCT (Li et al., 2018)：照片风格化
 /// - CalliGAN (Wu et al., 2020)：书法生成
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/style_models.dart';
 import '../../providers/stylization_provider.dart';
@@ -31,6 +36,19 @@ class StyleTransferView extends ConsumerStatefulWidget {
 }
 
 class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
+  final ImagePicker _imagePicker = ImagePicker();
+
+  Future<void> _pickContentImage(ImageSource source) async {
+    final image = await _imagePicker.pickImage(source: source);
+    if (image == null || !mounted) return;
+
+    ref.read(stylizationProvider.notifier).setContentImage(InputImage(
+          id: image.name,
+          title: image.name,
+          filePath: image.path,
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(stylizationProvider);
@@ -113,9 +131,7 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
                         : Text(
                             '${index + 1}',
                             style: TextStyle(
-                              color: isActive
-                                  ? Colors.white
-                                  : Colors.grey[600],
+                              color: isActive ? Colors.white : Colors.grey[600],
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -127,8 +143,7 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
                   steps[index],
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight:
-                        isActive ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
                     color: isActive
                         ? AppTheme.vermilion
                         : isCompleted
@@ -157,7 +172,8 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
 
   // ─── 步骤内容 ─────────────────────────────────────────────
 
-  Widget _buildStepContent(StylizationState state, StylizationNotifier notifier) {
+  Widget _buildStepContent(
+      StylizationState state, StylizationNotifier notifier) {
     switch (state.currentStep) {
       case TransferStep.selectContent:
         return _BuildSelectContent(state, notifier);
@@ -174,7 +190,8 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
 
   // ── 步骤1：选择内容图片 ──
 
-  Widget _BuildSelectContent(StylizationState state, StylizationNotifier notifier) {
+  Widget _BuildSelectContent(
+      StylizationState state, StylizationNotifier notifier) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -183,27 +200,13 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
           children: [
             // 内容预览区
             if (state.contentImage != null) ...[
-              Container(
-                width: 250,
-                height: 250,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.image, size: 48, color: Colors.grey),
-                      const SizedBox(height: 8),
-                      Text(
-                        state.contentImage!.title.isNotEmpty
-                            ? state.contentImage!.title
-                            : '已选择图片',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ],
-                  ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.file(
+                  File(state.contentImage!.filePath),
+                  width: 250,
+                  height: 250,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: 16),
@@ -220,7 +223,7 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.grey.withValues(alpha: 0.3),
+                    color: Colors.grey.withOpacity(0.3),
                     style: BorderStyle.solid,
                     width: 2,
                   ),
@@ -254,20 +257,13 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
                 ElevatedButton.icon(
                   icon: const Icon(Icons.photo_library),
                   label: const Text('从相册选择'),
-                  onPressed: () {
-                    // TODO: 调用 image_picker
-                    notifier.setContentImage(
-                      const InputImage(id: 'demo', title: '示例图片'),
-                    );
-                  },
+                  onPressed: () => _pickContentImage(ImageSource.gallery),
                 ),
                 const SizedBox(width: 12),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.camera_alt),
                   label: const Text('拍照'),
-                  onPressed: () {
-                    // TODO: 调用 camera
-                  },
+                  onPressed: () => _pickContentImage(ImageSource.camera),
                 ),
               ],
             ),
@@ -279,7 +275,8 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
 
   // ── 步骤2：选择风格参考 ──
 
-  Widget _BuildSelectStyle(StylizationState state, StylizationNotifier notifier) {
+  Widget _BuildSelectStyle(
+      StylizationState state, StylizationNotifier notifier) {
     final styles = state.availableStyles;
 
     if (styles.isEmpty) {
@@ -317,7 +314,7 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
             },
             child: Container(
               decoration: BoxDecoration(
-                color: style.color.withValues(alpha: 0.4),
+                color: style.color.withOpacity(0.4),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected ? AppTheme.vermilion : Colors.transparent,
@@ -327,7 +324,8 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.brush, size: 32, color: AppTheme.inkBlackLight),
+                  const Icon(Icons.brush,
+                      size: 32, color: AppTheme.inkBlackLight),
                   const SizedBox(height: 8),
                   Text(
                     style.name,
@@ -366,7 +364,8 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
 
   // ── 步骤3：调整参数 ──
 
-  Widget _BuildAdjustParams(StylizationState state, StylizationNotifier notifier) {
+  Widget _BuildAdjustParams(
+      StylizationState state, StylizationNotifier notifier) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -410,11 +409,13 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
           const SizedBox(height: 32),
 
           // 风格强度滑块
-          const Text('风格强度', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+          const Text('风格强度',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
           const SizedBox(height: 8),
           Row(
             children: [
-              const Text('弱', style: TextStyle(fontSize: 13, color: Colors.grey)),
+              const Text('弱',
+                  style: TextStyle(fontSize: 13, color: Colors.grey)),
               Expanded(
                 child: Slider(
                   value: state.styleStrength,
@@ -426,13 +427,15 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
                   onChanged: (v) => notifier.setStyleStrength(v),
                 ),
               ),
-              const Text('强', style: TextStyle(fontSize: 13, color: Colors.grey)),
+              const Text('强',
+                  style: TextStyle(fontSize: 13, color: Colors.grey)),
             ],
           ),
           const SizedBox(height: 24),
 
           // 迁移方法选择
-          const Text('迁移算法', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+          const Text('迁移算法',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -442,7 +445,7 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
               return ChoiceChip(
                 label: Text(_methodLabel(method)),
                 selected: isSelected,
-                selectedColor: AppTheme.vermilion.withValues(alpha: 0.2),
+                selectedColor: AppTheme.vermilion.withOpacity(0.2),
                 onSelected: (_) => notifier.setTransferMethod(method),
               );
             }).toList(),
@@ -517,10 +520,13 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
                         color: Colors.grey[200],
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Center(child: Text('原图', style: TextStyle(color: Colors.grey))),
+                      child: const Center(
+                          child:
+                              Text('原图', style: TextStyle(color: Colors.grey))),
                     ),
                     const SizedBox(height: 4),
-                    const Text('内容图片', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    const Text('内容图片',
+                        style: TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
                 ),
               ),
@@ -533,10 +539,12 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
                       decoration: BoxDecoration(
                         color: AppTheme.paperYellow,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.vermilion.withValues(alpha: 0.3)),
+                        border: Border.all(
+                            color: AppTheme.vermilion.withOpacity(0.3)),
                       ),
                       child: const Center(
-                        child: Icon(Icons.brush, size: 48, color: AppTheme.vermilion),
+                        child: Icon(Icons.brush,
+                            size: 48, color: AppTheme.vermilion),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -579,14 +587,14 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
             children: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
-                label: const Text('保存到本地'),
-                onPressed: () => notifier.markResultSaved(),
+                label: const Text('保存功能未开放'),
+                onPressed: null,
               ),
               const SizedBox(width: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.share),
-                label: const Text('分享'),
-                onPressed: () {},
+                label: const Text('分享功能未开放'),
+                onPressed: null,
               ),
             ],
           ),
@@ -602,7 +610,8 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
 
   // ─── 底部操作按钮 ─────────────────────────────────────────
 
-  Widget _buildBottomAction(StylizationState state, StylizationNotifier notifier) {
+  Widget _buildBottomAction(
+      StylizationState state, StylizationNotifier notifier) {
     if (state.currentStep == TransferStep.completed ||
         state.currentStep == TransferStep.processing) {
       return const SizedBox.shrink();
@@ -615,7 +624,7 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         border: Border(
-          top: BorderSide(color: Colors.grey.withValues(alpha: 0.15)),
+          top: BorderSide(color: Colors.grey.withOpacity(0.15)),
         ),
       ),
       child: SizedBox(
@@ -634,13 +643,20 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
 
   String _methodLabel(StyleTransferMethod method) {
     switch (method) {
-      case StyleTransferMethod.adain: return 'AdaIN';
-      case StyleTransferMethod.sanet: return 'SANet';
-      case StyleTransferMethod.stytr2: return 'StyTr2';
-      case StyleTransferMethod.artflow: return 'ArtFlow';
-      case StyleTransferMethod.photowct: return 'PhotoWCT';
-      case StyleTransferMethod.calligan: return 'CalliGAN';
-      case StyleTransferMethod.custom: return '自定义';
+      case StyleTransferMethod.adain:
+        return 'AdaIN';
+      case StyleTransferMethod.sanet:
+        return 'SANet';
+      case StyleTransferMethod.stytr2:
+        return 'StyTr2';
+      case StyleTransferMethod.artflow:
+        return 'ArtFlow';
+      case StyleTransferMethod.photowct:
+        return 'PhotoWCT';
+      case StyleTransferMethod.calligan:
+        return 'CalliGAN';
+      case StyleTransferMethod.custom:
+        return '自定义';
     }
   }
 
@@ -670,7 +686,9 @@ class _StyleTransferViewState extends ConsumerState<StyleTransferView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontSize: 13, color: Colors.grey)),
-          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+          Text(value,
+              style:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
         ],
       ),
     );

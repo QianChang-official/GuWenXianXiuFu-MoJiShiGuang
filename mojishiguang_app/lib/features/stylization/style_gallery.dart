@@ -188,11 +188,13 @@ class _StyleGalleryState extends State<StyleGallery> {
     }
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      result = result.where((s) =>
-          s.name.toLowerCase().contains(query) ||
-          s.author.toLowerCase().contains(query) ||
-          s.dynasty.toLowerCase().contains(query) ||
-          s.tags.any((t) => t.toLowerCase().contains(query))).toList();
+      result = result
+          .where((s) =>
+              s.name.toLowerCase().contains(query) ||
+              s.author.toLowerCase().contains(query) ||
+              s.dynasty.toLowerCase().contains(query) ||
+              s.tags.any((t) => t.toLowerCase().contains(query)))
+          .toList();
     }
     return result;
   }
@@ -261,8 +263,11 @@ class _StyleGalleryState extends State<StyleGallery> {
                     label: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(cat.icon, size: 16,
-                            color: isSelected ? Colors.white : AppTheme.inkBlackLight),
+                        Icon(cat.icon,
+                            size: 16,
+                            color: isSelected
+                                ? Colors.white
+                                : AppTheme.inkBlackLight),
                         const SizedBox(width: 4),
                         Text(cat.label),
                       ],
@@ -317,18 +322,21 @@ class _StyleGalleryState extends State<StyleGallery> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off, size: 48, color: Colors.grey[300]),
+                        Icon(Icons.search_off,
+                            size: 48, color: Colors.grey[300]),
                         const SizedBox(height: 12),
                         Text(
                           '未找到匹配的风格',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+                          style:
+                              TextStyle(fontSize: 16, color: Colors.grey[500]),
                         ),
                       ],
                     ),
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.85,
                       crossAxisSpacing: 12,
@@ -408,7 +416,7 @@ class _StyleCard extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       style.color,
-                      style.color.withValues(alpha: 0.6),
+                      style.color.withOpacity(0.6),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -423,7 +431,7 @@ class _StyleCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: Colors.white.withOpacity(0.6),
                           fontFamily: 'SourceHanSerifSC',
                         ),
                       ),
@@ -436,7 +444,7 @@ class _StyleCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.2),
+                          color: Colors.black.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -505,7 +513,7 @@ class _StyleCard extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     style.color,
-                    style.color.withValues(alpha: 0.6),
+                    style.color.withOpacity(0.6),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(12),
@@ -515,7 +523,7 @@ class _StyleCard extends StatelessWidget {
                   style.name.split('·').last,
                   style: TextStyle(
                     fontSize: 40,
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: Colors.white.withOpacity(0.7),
                     fontFamily: 'SourceHanSerifSC',
                     fontWeight: FontWeight.w700,
                   ),
@@ -570,19 +578,32 @@ class _StyleCard extends StatelessWidget {
 
   String _typeLabel(CalligraphyStyle type) {
     switch (type) {
-      case CalligraphyStyle.thinGold: return '瘦金体';
-      case CalligraphyStyle.yanStyle: return '颜体';
-      case CalligraphyStyle.liuStyle: return '柳体';
-      case CalligraphyStyle.ouStyle: return '欧体';
-      case CalligraphyStyle.zhaoStyle: return '赵体';
-      case CalligraphyStyle.wangXizhi: return '王体';
-      case CalligraphyStyle.clericalScript: return '隶书';
-      case CalligraphyStyle.sealScript: return '篆书';
-      case CalligraphyStyle.cursiveScript: return '草书';
-      case CalligraphyStyle.regularScript: return '楷书';
-      case CalligraphyStyle.runningScript: return '行书';
-      case CalligraphyStyle.weiStele: return '魏碑';
-      case CalligraphyStyle.other: return '其他';
+      case CalligraphyStyle.thinGold:
+        return '瘦金体';
+      case CalligraphyStyle.yanStyle:
+        return '颜体';
+      case CalligraphyStyle.liuStyle:
+        return '柳体';
+      case CalligraphyStyle.ouStyle:
+        return '欧体';
+      case CalligraphyStyle.zhaoStyle:
+        return '赵体';
+      case CalligraphyStyle.wangXizhi:
+        return '王体';
+      case CalligraphyStyle.clericalScript:
+        return '隶书';
+      case CalligraphyStyle.sealScript:
+        return '篆书';
+      case CalligraphyStyle.cursiveScript:
+        return '草书';
+      case CalligraphyStyle.regularScript:
+        return '楷书';
+      case CalligraphyStyle.runningScript:
+        return '行书';
+      case CalligraphyStyle.weiStele:
+        return '魏碑';
+      case CalligraphyStyle.other:
+        return '其他';
     }
   }
 }

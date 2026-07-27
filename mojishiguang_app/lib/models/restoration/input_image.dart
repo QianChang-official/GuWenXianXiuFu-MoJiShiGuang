@@ -50,7 +50,7 @@ class InputImage {
   }
 
   /// 图片分辨率（百万像素）
-  double get megapixels => (width * height) / 1_000_000;
+  double get megapixels => (width * height) / 1000000;
 
   /// 是否为高分辨率图片（> 12MP）
   bool get isHighResolution => megapixels > 12.0;

@@ -8,6 +8,8 @@
 /// 状态设计参考：单次迁移工作流 (TransferSession)、多风格预览 (Preview)、
 /// 书法对比分析 (Comparison)、风格选择 (Gallery)
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -213,6 +215,10 @@ class StylizationNotifier extends Notifier<StylizationState> {
     final content = state.contentImage;
     final style = state.selectedStyle;
     if (content == null || style == null) return;
+    if (!_hasReadableFile(content)) {
+      state = state.copyWith(errorMessage: '请选择有效的内容图片');
+      return;
+    }
 
     state = state.copyWith(
       currentStep: TransferStep.processing,
@@ -308,10 +314,26 @@ class StylizationNotifier extends Notifier<StylizationState> {
     );
   }
 
+  /// 清除用户书写图片
+  void clearUserWritingImage() {
+    state = state.copyWith(
+      userWritingImage: null,
+      comparisonResult: null,
+    );
+  }
+
   /// 设置参考碑帖图片
   void setReferenceImage(InputImage image) {
     state = state.copyWith(
       referenceImage: image,
+      comparisonResult: null,
+    );
+  }
+
+  /// 清除参考碑帖图片
+  void clearReferenceImage() {
+    state = state.copyWith(
+      referenceImage: null,
       comparisonResult: null,
     );
   }
@@ -321,6 +343,10 @@ class StylizationNotifier extends Notifier<StylizationState> {
     final userWriting = state.userWritingImage;
     final reference = state.referenceImage;
     if (userWriting == null || reference == null) return;
+    if (!_hasReadableFile(userWriting) || !_hasReadableFile(reference)) {
+      state = state.copyWith(errorMessage: '请选择有效的作品和参考碑帖图片');
+      return;
+    }
 
     state = state.copyWith(
       isProcessing: true,
@@ -383,15 +409,6 @@ class StylizationNotifier extends Notifier<StylizationState> {
 
   // ─── 结果管理 ─────────────────────────────────────────────
 
-  /// 标记结果为已保存
-  void markResultSaved() {
-    if (state.result != null) {
-      state = state.copyWith(
-        result: state.result!.copyWith(isSaved: true),
-      );
-    }
-  }
-
   /// 为用户评分结果
   void rateResult(int rating) {
     if (state.result != null) {
@@ -432,6 +449,10 @@ class StylizationNotifier extends Notifier<StylizationState> {
   /// 清除错误信息
   void clearError() {
     state = state.copyWith(errorMessage: null);
+  }
+
+  bool _hasReadableFile(InputImage image) {
+    return image.filePath.isNotEmpty && File(image.filePath).existsSync();
   }
 }
 

@@ -126,6 +126,40 @@ enum OcrMode {
 // 数据模型
 // ============================================================================
 
+/// OCR 输入图片及其上传字节。
+@immutable
+class OcrInputImage extends Equatable {
+  final String filePath;
+  final List<int> bytes;
+
+  const OcrInputImage({
+    required this.filePath,
+    required this.bytes,
+  });
+
+  @override
+  List<Object?> get props => [filePath, bytes];
+}
+
+/// 单字查询的聚合结果。
+@immutable
+class CharacterDetail extends Equatable {
+  final String character;
+  final List<CharacterCandidate> candidates;
+  final DictionaryEntry? dictionary;
+  final VariationInfo? variation;
+
+  const CharacterDetail({
+    required this.character,
+    this.candidates = const [],
+    this.dictionary,
+    this.variation,
+  });
+
+  @override
+  List<Object?> get props => [character, candidates, dictionary, variation];
+}
+
 /// 文字检测区域 - 图片中检测到的单个文字区域
 ///
 /// 包含边界框坐标、置信度分数和识别文字等信息。
