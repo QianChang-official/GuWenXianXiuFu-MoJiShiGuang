@@ -43,7 +43,7 @@ class _RestorationWorkflowState extends ConsumerState<RestorationWorkflow> {
   /// 步骤定义
   static const List<_StepDef> _steps = [
     _StepDef('选择图片', Icons.image),
-    _StepDef('破损检测', Icons.detective),
+    _StepDef('破损检测', Icons.search),
     _StepDef('选择方法', Icons.menu_book),
     _StepDef('AI 修复', Icons.auto_fix_high),
     _StepDef('质量评估', Icons.assessment),
@@ -67,7 +67,7 @@ class _RestorationWorkflowState extends ConsumerState<RestorationWorkflow> {
           onPressed: () {
             if (_currentStepIndex > 0 && !state.isProcessing) {
               // 回到上一步
-              _goToStep(state, notifier);
+              _goToPreviousStep(state, notifier);
             } else {
               context.pop();
             }
@@ -238,7 +238,7 @@ class _RestorationWorkflowState extends ConsumerState<RestorationWorkflow> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton.icon(
-                    icon: const Icon(Icons.detective),
+                    icon: const Icon(Icons.search),
                     label: const Text('开始破损检测'),
                     onPressed: () => notifier.detectDamage(),
                   ),
@@ -266,15 +266,13 @@ class _RestorationWorkflowState extends ConsumerState<RestorationWorkflow> {
                   ElevatedButton.icon(
                     icon: const Icon(Icons.camera_alt),
                     label: const Text('拍照'),
-                    onPressed: () =>
-                        notifier.pickImage(ImageSource.camera),
+                    onPressed: () => notifier.pickImage(ImageSource.camera),
                   ),
                   const SizedBox(width: 12),
                   OutlinedButton.icon(
                     icon: const Icon(Icons.photo_library),
                     label: const Text('从相册选择'),
-                    onPressed: () =>
-                        notifier.pickImage(ImageSource.gallery),
+                    onPressed: () => notifier.pickImage(ImageSource.gallery),
                   ),
                 ],
               ),
@@ -314,7 +312,7 @@ class _RestorationWorkflowState extends ConsumerState<RestorationWorkflow> {
                 icon: const Icon(Icons.arrow_forward),
                 label: const Text('选择修复方法'),
                 onPressed: () =>
-                    notifier.selectMethod(state.selectedMethod),
+                    notifier.goToStep(RestorationStep.selectMethod),
               ),
             ),
         ],
@@ -359,8 +357,7 @@ class _RestorationWorkflowState extends ConsumerState<RestorationWorkflow> {
             child: ElevatedButton.icon(
               icon: const Icon(Icons.auto_fix_high),
               label: Text('使用 ${state.selectedMethod.name} 修复'),
-              onPressed: () =>
-                  notifier.restoreWithMethod(state.selectedMethod),
+              onPressed: () => notifier.restoreWithMethod(state.selectedMethod),
             ),
           ),
         ),
@@ -437,9 +434,7 @@ class _RestorationWorkflowState extends ConsumerState<RestorationWorkflow> {
             width: 80,
             height: 80,
             child: CircularProgressIndicator(
-              value: state.progress > 0.9
-                  ? (state.progress - 0.9) * 10
-                  : null,
+              value: state.progress > 0.9 ? (state.progress - 0.9) * 10 : null,
               strokeWidth: 6,
               color: AppTheme.vermilion,
             ),
@@ -488,8 +483,7 @@ class _RestorationWorkflowState extends ConsumerState<RestorationWorkflow> {
         child: LinearProgressIndicator(
           value: state.progress,
           backgroundColor: Colors.grey[200],
-          valueColor:
-              const AlwaysStoppedAnimation<Color>(AppTheme.vermilion),
+          valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.vermilion),
           minHeight: 6,
         ),
       ),
@@ -532,9 +526,11 @@ class _RestorationWorkflowState extends ConsumerState<RestorationWorkflow> {
   }
 
   /// 回到上一步（辅助方法）
-  void _goToStep(RestorationState state, RestorationNotifier notifier) {
-    // 通过 provider 的重置或状态管理回到上一步
-    notifier.reset();
+  void _goToPreviousStep(RestorationState state, RestorationNotifier notifier) {
+    final currentIndex = _stepFromEnum(state.currentStep);
+    if (currentIndex > 0) {
+      notifier.goToStep(RestorationStep.values[currentIndex - 1]);
+    }
   }
 }
 

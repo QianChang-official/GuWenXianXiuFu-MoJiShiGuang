@@ -12,6 +12,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../models/style_models.dart';
@@ -33,6 +34,24 @@ class _CalligraphyCompareScreenState
     extends ConsumerState<CalligraphyCompareScreen> {
   /// 滑条对比位置
   double _sliderPosition = 0.5;
+  final ImagePicker _imagePicker = ImagePicker();
+
+  Future<void> _pickImage({required bool isUserWriting}) async {
+    final image = await _imagePicker.pickImage(source: ImageSource.gallery);
+    if (image == null || !mounted) return;
+
+    final input = InputImage(
+      id: image.name,
+      title: image.name,
+      filePath: image.path,
+    );
+    final notifier = ref.read(stylizationProvider.notifier);
+    if (isUserWriting) {
+      notifier.setUserWritingImage(input);
+    } else {
+      notifier.setReferenceImage(input);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +83,10 @@ class _CalligraphyCompareScreenState
 
   Widget _buildUploadSection(
       ThemeData theme, StylizationState state, StylizationNotifier notifier) {
+    final canCompare = _isExistingFile(state.userWritingImage?.filePath) &&
+        _isExistingFile(state.referenceImage?.filePath) &&
+        !state.isProcessing;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -71,13 +94,12 @@ class _CalligraphyCompareScreenState
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppTheme.vermilion.withValues(alpha: 0.05),
+            color: AppTheme.vermilion.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
-              Icon(Icons.info_outline,
-                  color: AppTheme.vermilion, size: 20),
+              Icon(Icons.info_outline, color: AppTheme.vermilion, size: 20),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
@@ -100,13 +122,9 @@ class _CalligraphyCompareScreenState
                 theme: theme,
                 title: '您的作品',
                 icon: Icons.person,
-                hasImage: state.userWritingImage != null,
-                onPick: () {
-                  notifier.setUserWritingImage(
-                    const InputImage(id: 'user', title: '我的临摹'),
-                  );
-                },
-                onClear: () => notifier.resetComparison(),
+                imagePath: state.userWritingImage?.filePath,
+                onPick: () => _pickImage(isUserWriting: true),
+                onClear: notifier.clearUserWritingImage,
               ),
             ),
             const SizedBox(width: 16),
@@ -115,13 +133,9 @@ class _CalligraphyCompareScreenState
                 theme: theme,
                 title: '参考碑帖',
                 icon: Icons.auto_stories,
-                hasImage: state.referenceImage != null,
-                onPick: () {
-                  notifier.setReferenceImage(
-                    const InputImage(id: 'ref', title: '参考碑帖'),
-                  );
-                },
-                onClear: () => notifier.resetComparison(),
+                imagePath: state.referenceImage?.filePath,
+                onPick: () => _pickImage(isUserWriting: false),
+                onClear: notifier.clearReferenceImage,
               ),
             ),
           ],
@@ -136,30 +150,25 @@ class _CalligraphyCompareScreenState
           spacing: 8,
           runSpacing: 8,
           children: [
-            _buildMetricChip('笔画准确度', CompareMetric.strokeAccuracy,
-                theme, true),
+            _buildMetricChip(
+                '笔画准确度', CompareMetric.strokeAccuracy, theme, true),
             _buildMetricChip(
                 '结构相似度', CompareMetric.structuralSimilarity, theme, true),
             _buildMetricChip(
                 '风格一致性', CompareMetric.styleConsistency, theme, true),
-            _buildMetricChip('整体质量', CompareMetric.overallQuality, theme, false),
+            _buildMetricChip(
+                '整体质量', CompareMetric.overallQuality, theme, false),
           ],
         ),
         const SizedBox(height: 24),
 
         // 开始对比按钮
-        final canCompare = state.userWritingImage != null &&
-            state.referenceImage != null &&
-            !state.isProcessing;
-
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
             icon: const Icon(Icons.compare_arrows),
             label: const Text('开始对比分析'),
-            onPressed: canCompare
-                ? () => notifier.compareCalligraphy()
-                : null,
+            onPressed: canCompare ? () => notifier.compareCalligraphy() : null,
           ),
         ),
 
@@ -169,8 +178,7 @@ class _CalligraphyCompareScreenState
           const LinearProgressIndicator(),
           const SizedBox(height: 8),
           const Center(
-              child: Text('正在分析笔画...',
-                  style: TextStyle(color: Colors.grey))),
+              child: Text('正在分析笔画...', style: TextStyle(color: Colors.grey))),
         ],
 
         // 错误提示
@@ -189,10 +197,11 @@ class _CalligraphyCompareScreenState
     required ThemeData theme,
     required String title,
     required IconData icon,
-    required bool hasImage,
+    required String? imagePath,
     required VoidCallback onPick,
     required VoidCallback onClear,
   }) {
+    final hasImage = imagePath?.isNotEmpty == true;
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -201,27 +210,28 @@ class _CalligraphyCompareScreenState
           children: [
             Text(
               title,
-              style:
-                  const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             Container(
               height: 150,
               decoration: BoxDecoration(
-                color: hasImage
-                    ? AppTheme.paperYellow
-                    : Colors.grey[100],
+                color: hasImage ? AppTheme.paperYellow : Colors.grey[100],
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: hasImage
-                      ? AppTheme.vermilion.withValues(alpha: 0.3)
-                      : Colors.grey.withValues(alpha: 0.3),
+                      ? AppTheme.vermilion.withOpacity(0.3)
+                      : Colors.grey.withOpacity(0.3),
                 ),
               ),
               child: hasImage
-                  ? const Center(
-                      child: Icon(Icons.image,
-                          size: 48, color: AppTheme.vermilion),
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        File(imagePath!),
+                        width: double.infinity,
+                        fit: BoxFit.contain,
+                      ),
                     )
                   : Center(
                       child: Icon(Icons.add_photo_alternate,
@@ -253,11 +263,10 @@ class _CalligraphyCompareScreenState
 
   Widget _buildMetricChip(
       String label, CompareMetric metric, ThemeData theme, bool selected) {
-    return FilterChip(
+    return Chip(
       label: Text(label, style: const TextStyle(fontSize: 12)),
-      selected: selected,
-      onSelected: (_) {},
-      selectedColor: AppTheme.vermilion.withValues(alpha: 0.1),
+      avatar: selected ? const Icon(Icons.check, size: 16) : null,
+      backgroundColor: selected ? AppTheme.vermilion.withOpacity(0.1) : null,
     );
   }
 
@@ -342,8 +351,7 @@ class _CalligraphyCompareScreenState
             Icon(Icons.compare, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             const Text('笔画对比',
-                style:
-                    TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
           ],
         ),
         const SizedBox(height: 12),
@@ -365,12 +373,10 @@ class _CalligraphyCompareScreenState
                               ? Image.file(
                                   File(result.comparisonImagePath),
                                   fit: BoxFit.contain,
-                                  errorBuilder:
-                                      (context, error, stackTrace) {
+                                  errorBuilder: (context, error, stackTrace) {
                                     return Center(
                                       child: Icon(Icons.auto_stories,
-                                          size: 48,
-                                          color: Colors.grey[400]),
+                                          size: 48, color: Colors.grey[400]),
                                     );
                                   },
                                 )
@@ -393,9 +399,9 @@ class _CalligraphyCompareScreenState
                                     child: Image.file(
                                       File(result.comparisonImagePath),
                                       fit: BoxFit.contain,
-                                      errorBuilder: (context, error,
-                                              stackTrace) =>
-                                          const SizedBox.shrink(),
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const SizedBox.shrink(),
                                     ),
                                   )
                                 : const SizedBox.shrink(),
@@ -436,8 +442,7 @@ class _CalligraphyCompareScreenState
                 // 滑动条
                 Slider(
                   value: _sliderPosition,
-                  onChanged: (v) =>
-                      setState(() => _sliderPosition = v),
+                  onChanged: (v) => setState(() => _sliderPosition = v),
                   activeColor: AppTheme.vermilion,
                 ),
                 // 标签
@@ -475,14 +480,13 @@ class _CalligraphyCompareScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('分维度评分',
-                style:
-                    TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
             _scoreBar('笔画准确度', result.strokeAccuracyScore,
                 const Color(0xFFE74C3C), theme),
             const SizedBox(height: 12),
-            _scoreBar('结构相似度', result.structuralScore,
-                const Color(0xFF3498DB), theme),
+            _scoreBar('结构相似度', result.structuralScore, const Color(0xFF3498DB),
+                theme),
             const SizedBox(height: 12),
             _scoreBar('风格一致性', result.styleConsistencyScore,
                 const Color(0xFF9B59B6), theme),
@@ -512,7 +516,7 @@ class _CalligraphyCompareScreenState
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: score / 100,
-            backgroundColor: color.withValues(alpha: 0.1),
+            backgroundColor: color.withOpacity(0.1),
             valueColor: AlwaysStoppedAnimation(color),
             minHeight: 8,
           ),
@@ -541,7 +545,8 @@ class _CalligraphyCompareScreenState
                   Text(
                     '共 ${strokes.length} 笔',
                     style: TextStyle(
-                        fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurfaceVariant),
                   ),
               ],
             ),
@@ -591,8 +596,8 @@ class _CalligraphyCompareScreenState
                 result.overallComment.isNotEmpty
                     ? result.overallComment
                     : '总体评价不错，继续练习会有更大进步！',
-                style: TextStyle(
-                    fontSize: 13, color: theme.colorScheme.onSurface),
+                style:
+                    TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
               )
             else
               ...suggestions.asMap().entries.map((entry) {
@@ -623,7 +628,7 @@ class _CalligraphyCompareScreenState
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.paperYellow.withValues(alpha: 0.5),
+                  color: AppTheme.paperYellow.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -641,6 +646,10 @@ class _CalligraphyCompareScreenState
     );
   }
 
+  bool _isExistingFile(String? path) {
+    return path?.isNotEmpty == true && File(path!).existsSync();
+  }
+
   String _scoreLevel(double score) {
     if (score >= 90) return '书法大师级';
     if (score >= 80) return '颇有功底';
@@ -655,8 +664,7 @@ class _StrokeAnalysisTile extends StatelessWidget {
   final StrokeAnalysis stroke;
   final ThemeData theme;
 
-  const _StrokeAnalysisTile(
-      {required this.stroke, required this.theme});
+  const _StrokeAnalysisTile({required this.stroke, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -669,7 +677,7 @@ class _StrokeAnalysisTile extends StatelessWidget {
           color: Colors.grey[50],
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: Colors.grey.withValues(alpha: 0.15),
+            color: Colors.grey.withOpacity(0.15),
           ),
         ),
         child: Column(
@@ -688,8 +696,8 @@ class _StrokeAnalysisTile extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: accuracy >= 0.7
-                        ? Colors.green.withValues(alpha: 0.1)
-                        : Colors.red.withValues(alpha: 0.1),
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -716,7 +724,7 @@ class _StrokeAnalysisTile extends StatelessWidget {
                 '💡 ${stroke.improvementSuggestion}',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppTheme.vermilion.withValues(alpha: 0.8),
+                  color: AppTheme.vermilion.withOpacity(0.8),
                 ),
               ),
             ],
@@ -740,6 +748,5 @@ class _LeftClipper extends CustomClipper<Rect> {
   }
 
   @override
-  bool shouldReclip(_LeftClipper oldClipper) =>
-      oldClipper.fraction != fraction;
+  bool shouldReclip(_LeftClipper oldClipper) => oldClipper.fraction != fraction;
 }

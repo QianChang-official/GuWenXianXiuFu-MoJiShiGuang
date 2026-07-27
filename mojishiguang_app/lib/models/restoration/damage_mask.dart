@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../core/utils/json_converters.dart';
 
 part 'damage_mask.freezed.dart';
 part 'damage_mask.g.dart';
@@ -9,12 +10,16 @@ part 'damage_mask.g.dart';
 enum DamageType {
   /// 虫蛀
   wormEaten,
+
   /// 水渍
   waterStain,
+
   /// 缺角
   missingCorner,
+
   /// 折裂
   foldCrack,
+
   /// 模糊
   fuzzy,
 }
@@ -24,7 +29,7 @@ enum DamageType {
 class DamageRegion with _$DamageRegion {
   const factory DamageRegion({
     /// 破损区域边界框
-    required Rect boundingBox,
+    @RectConverter() required Rect boundingBox,
 
     /// 破损区域面积（像素数）
     required double area,
@@ -42,7 +47,7 @@ class DamageRegion with _$DamageRegion {
 class DamageMask with _$DamageMask {
   const factory DamageMask({
     /// 掩码图片字节
-    required Uint8List maskBytes,
+    @Uint8ListConverter() required Uint8List maskBytes,
 
     /// 掩码宽度
     required int width,

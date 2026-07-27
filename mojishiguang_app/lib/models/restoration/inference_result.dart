@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'inference_result.freezed.dart';
@@ -53,8 +55,7 @@ class Tensor {
   });
 
   /// 获取 Tensor 总元素数
-  int get elementCount =>
-      shape.isEmpty ? 0 : shape.reduce((a, b) => a * b);
+  int get elementCount => shape.isEmpty ? 0 : shape.reduce((a, b) => a * b);
 
   /// 转换为字节列表
   List<int> toBytes() {

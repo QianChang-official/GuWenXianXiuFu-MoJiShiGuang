@@ -37,6 +37,7 @@ class StylizationScreen extends ConsumerStatefulWidget {
 class _StylizationScreenState extends ConsumerState<StylizationScreen> {
   /// 文字输入控制器
   final TextEditingController _textController = TextEditingController();
+  final ImagePicker _imagePicker = ImagePicker();
 
   /// 是否显示文字输入模式
   bool _textMode = true;
@@ -45,6 +46,17 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
   void dispose() {
     _textController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickContentImage(ImageSource source) async {
+    final image = await _imagePicker.pickImage(source: source);
+    if (image == null || !mounted) return;
+
+    ref.read(stylizationProvider.notifier).setContentImage(InputImage(
+          id: image.name,
+          title: image.name,
+          filePath: image.path,
+        ));
   }
 
   @override
@@ -109,8 +121,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
               _buildScoreSection(theme, state),
 
             // ─── 分享导出按钮 ────────────────────────────────
-            if (state.result != null)
-              _buildShareExportButtons(theme, state, notifier),
+            if (state.result != null) _buildShareExportButtons(),
 
             // ─── 处理进度 ────────────────────────────────────
             if (state.isProcessing) _buildProcessingIndicator(theme, state),
@@ -195,8 +206,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
                   if (_textController.text.trim().isEmpty) return;
                   notifier.generateStyleText(
                     text: _textController.text.trim(),
-                    calligraphyStyle:
-                        state.selectedStyle?.name ?? '瘦金体',
+                    calligraphyStyle: state.selectedStyle?.name ?? '瘦金体',
                   );
                 },
               ),
@@ -253,8 +263,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(8),
-                  border:
-                      Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
                 ),
                 child: Center(
                   child: Column(
@@ -276,12 +285,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.camera_alt, size: 16),
                     label: const Text('拍照'),
-                    onPressed: () {
-                      // TODO: 集成 image_picker
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('拍照功能待集成')),
-                      );
-                    },
+                    onPressed: () => _pickContentImage(ImageSource.camera),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -289,12 +293,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.photo_library, size: 16),
                     label: const Text('从相册选择'),
-                    onPressed: () => notifier.setContentImage(
-                      const InputImage(
-                        id: 'sample',
-                        title: '用户选择图片',
-                      ),
-                    ),
+                    onPressed: () => _pickContentImage(ImageSource.gallery),
                   ),
                 ),
               ],
@@ -310,18 +309,18 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
       ThemeData theme, StylizationState state, StylizationNotifier notifier) {
     // 内置风格列表
     final List<_StyleItem> builtinStyles = [
-      _StyleItem('瘦金体', '宋徽宗·赵佶', Icons.brush,
-          const Color(0xFFE8D5A8), CalligraphyStyle.thinGold),
-      _StyleItem('颜体', '颜真卿', Icons.brush,
-          const Color(0xFFD4C5A0), CalligraphyStyle.yanStyle),
-      _StyleItem('柳体', '柳公权', Icons.brush,
-          const Color(0xFFA89878), CalligraphyStyle.liuStyle),
-      _StyleItem('欧体', '欧阳询', Icons.brush,
-          const Color(0xFFB8A88A), CalligraphyStyle.ouStyle),
-      _StyleItem('赵体', '赵孟頫', Icons.brush,
-          const Color(0xFFD8C8A8), CalligraphyStyle.zhaoStyle),
-      _StyleItem('行书', '王羲之', Icons.brush,
-          const Color(0xFFC4B898), CalligraphyStyle.runningScript),
+      _StyleItem('瘦金体', '宋徽宗·赵佶', Icons.brush, const Color(0xFFE8D5A8),
+          CalligraphyStyle.thinGold),
+      _StyleItem('颜体', '颜真卿', Icons.brush, const Color(0xFFD4C5A0),
+          CalligraphyStyle.yanStyle),
+      _StyleItem('柳体', '柳公权', Icons.brush, const Color(0xFFA89878),
+          CalligraphyStyle.liuStyle),
+      _StyleItem('欧体', '欧阳询', Icons.brush, const Color(0xFFB8A88A),
+          CalligraphyStyle.ouStyle),
+      _StyleItem('赵体', '赵孟頫', Icons.brush, const Color(0xFFD8C8A8),
+          CalligraphyStyle.zhaoStyle),
+      _StyleItem('行书', '王羲之', Icons.brush, const Color(0xFFC4B898),
+          CalligraphyStyle.runningScript),
     ];
 
     return Column(
@@ -374,20 +373,19 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
                   width: 90,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: style.color.withValues(
-                        alpha: isSelected ? 0.6 : 0.3),
+                    color: style.color.withOpacity(isSelected ? 0.6 : 0.3),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected
-                          ? AppTheme.vermilion
-                          : Colors.transparent,
+                      color:
+                          isSelected ? AppTheme.vermilion : Colors.transparent,
                       width: 2,
                     ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(style.icon, size: 24,
+                      Icon(style.icon,
+                          size: 24,
                           color: isSelected
                               ? AppTheme.vermilion
                               : AppTheme.inkBlackLight),
@@ -487,7 +485,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
                       color: AppTheme.paperYellow,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: AppTheme.vermilion.withValues(alpha: 0.3)),
+                          color: AppTheme.vermilion.withOpacity(0.3)),
                     ),
                     child: result.resultPath.isNotEmpty
                         ? ClipRRect(
@@ -576,8 +574,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
                       ),
                       const SizedBox(width: 8),
                       const Text('/ 100',
-                          style: TextStyle(
-                              fontSize: 16, color: Colors.grey)),
+                          style: TextStyle(fontSize: 16, color: Colors.grey)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -610,9 +607,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
             Text(
               score.toStringAsFixed(1),
               style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: color),
+                  fontSize: 12, fontWeight: FontWeight.w600, color: color),
             ),
           ],
         ),
@@ -621,7 +616,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: score / 100,
-            backgroundColor: color.withValues(alpha: 0.1),
+            backgroundColor: color.withOpacity(0.1),
             valueColor: AlwaysStoppedAnimation(color),
             minHeight: 6,
           ),
@@ -631,8 +626,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
   }
 
   /// 分享导出按钮
-  Widget _buildShareExportButtons(
-      ThemeData theme, StylizationState state, StylizationNotifier notifier) {
+  Widget _buildShareExportButtons() {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Row(
@@ -640,8 +634,8 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
           Expanded(
             child: ElevatedButton.icon(
               icon: const Icon(Icons.save, size: 18),
-              label: const Text('保存到本地'),
-              onPressed: () => notifier.markResultSaved(),
+              label: const Text('保存功能未开放'),
+              onPressed: null,
             ),
           ),
           const SizedBox(width: 12),
@@ -666,7 +660,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Card(
-        color: AppTheme.vermilion.withValues(alpha: 0.05),
+        color: AppTheme.vermilion.withOpacity(0.05),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -680,8 +674,7 @@ class _StylizationScreenState extends ConsumerState<StylizationScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('正在生成风格化图像...',
-                      style: TextStyle(fontSize: 14)),
+                  const Text('正在生成风格化图像...', style: TextStyle(fontSize: 14)),
                   if (state.progress > 0)
                     Text(
                       '${(state.progress * 100).toInt()}%',

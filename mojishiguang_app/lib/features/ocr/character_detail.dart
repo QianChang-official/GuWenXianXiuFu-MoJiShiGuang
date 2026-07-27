@@ -83,13 +83,14 @@ class _CharacterDetailPageState extends ConsumerState<CharacterDetailPage> {
     try {
       final notifier = ref.read(ocrProvider.notifier);
 
-      // 查询候选字和字典
-      final result = await notifier.queryCharacterDetail(widget.character);
+      final CharacterDetail result =
+          await notifier.queryCharacterDetail(widget.character);
 
       if (mounted) {
         setState(() {
           _candidates = result.candidates;
           _dictionaryEntry = result.dictionary;
+          _variationInfo = result.variation;
           _isLoading = false;
         });
       }
@@ -136,8 +137,7 @@ class _CharacterDetailPageState extends ConsumerState<CharacterDetailPage> {
                   ],
 
                   // ─── 异体字/避讳字 ────────────────────────────
-                  if (_variationInfo != null)
-                    _buildVariationSection(),
+                  if (_variationInfo != null) _buildVariationSection(),
 
                   // ─── 碑帖用法 ─────────────────────────────────
                   _buildUsageSection(),
@@ -259,7 +259,7 @@ class _CharacterDetailPageState extends ConsumerState<CharacterDetailPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppTheme.vermilion.withValues(alpha: 0.1),
+                    color: AppTheme.vermilion.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -328,7 +328,9 @@ class _CharacterDetailPageState extends ConsumerState<CharacterDetailPage> {
                   fontSize: 22,
                   fontWeight:
                       candidate.isDefault ? FontWeight.w700 : FontWeight.w400,
-                  color: candidate.isDefault ? AppTheme.vermilion : AppTheme.inkBlack,
+                  color: candidate.isDefault
+                      ? AppTheme.vermilion
+                      : AppTheme.inkBlack,
                 ),
               ),
             ),
@@ -400,12 +402,13 @@ class _CharacterDetailPageState extends ConsumerState<CharacterDetailPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
       decoration: BoxDecoration(
-        color: bgColor.withValues(alpha: 0.15),
+        color: bgColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 10, color: bgColor, fontWeight: FontWeight.w500),
+        style: TextStyle(
+            fontSize: 10, color: bgColor, fontWeight: FontWeight.w500),
       ),
     );
   }
@@ -443,15 +446,16 @@ class _CharacterDetailPageState extends ConsumerState<CharacterDetailPage> {
                 const Spacer(),
                 if (entry.source != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppTheme.paperYellow,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       entry.source!,
-                      style: const TextStyle(fontSize: 11, color: AppTheme.inkBlackLight),
+                      style: const TextStyle(
+                          fontSize: 11, color: AppTheme.inkBlackLight),
                     ),
                   ),
               ],
@@ -541,7 +545,9 @@ class _CharacterDetailPageState extends ConsumerState<CharacterDetailPage> {
                     ),
                     const Spacer(),
                     Text(
-                      _showFullDictionary ? '收起' : '展开 ${entry.ancientUsages.length} 项',
+                      _showFullDictionary
+                          ? '收起'
+                          : '展开 ${entry.ancientUsages.length} 项',
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     Icon(
@@ -649,13 +655,10 @@ class _CharacterDetailPageState extends ConsumerState<CharacterDetailPage> {
               ],
             ),
             const SizedBox(height: 12),
-            if (info.standardForm != null)
-              _infoRow('标准正字', info.standardForm!),
+            if (info.standardForm != null) _infoRow('标准正字', info.standardForm!),
             _infoRow('类型', info.variationType),
             if (info.era != null) _infoRow('时期', info.era!),
-            if (info.tabooEmperor != null)
-              _infoRow('避讳帝王',
-                  info.tabooEmperor!),
+            if (info.tabooEmperor != null) _infoRow('避讳帝王', info.tabooEmperor!),
             if (info.description != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -671,7 +674,8 @@ class _CharacterDetailPageState extends ConsumerState<CharacterDetailPage> {
             if (info.variantForms.isNotEmpty) ...[
               const SizedBox(height: 8),
               const Text('其他变体形式:',
-                  style: TextStyle(fontSize: 12, color: AppTheme.inkBlackLight)),
+                  style:
+                      TextStyle(fontSize: 12, color: AppTheme.inkBlackLight)),
               const SizedBox(height: 4),
               Wrap(
                 spacing: 8,

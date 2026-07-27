@@ -103,7 +103,7 @@ class _ResultViewerState extends State<ResultViewer> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+            color: theme.colorScheme.primaryContainer.withOpacity(0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(Icons.compare, color: theme.colorScheme.primary),
@@ -227,8 +227,8 @@ class _ResultViewerState extends State<ResultViewer> {
                       // 原图（裁剪到滑动位置）
                       Positioned.fill(
                         child: ClipRect(
-                          clipper:
-                              _LeftClipper(_sliderPosition, constraints.maxWidth),
+                          clipper: _LeftClipper(
+                              _sliderPosition, constraints.maxWidth),
                           child: _buildResultImage(widget.inputImage.filePath),
                         ),
                       ),
@@ -243,7 +243,7 @@ class _ResultViewerState extends State<ResultViewer> {
                             color: Colors.white,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
+                                color: Colors.black.withOpacity(0.3),
                                 blurRadius: 4,
                               ),
                             ],
@@ -264,7 +264,7 @@ class _ResultViewerState extends State<ResultViewer> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
+                                  color: Colors.black.withOpacity(0.2),
                                   blurRadius: 6,
                                 ),
                               ],
@@ -291,10 +291,12 @@ class _ResultViewerState extends State<ResultViewer> {
                 children: [
                   Text('修复前',
                       style: TextStyle(
-                          fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurfaceVariant)),
                   Text('修复后',
                       style: TextStyle(
-                          fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
             ),
@@ -359,8 +361,7 @@ class _ResultViewerState extends State<ResultViewer> {
                 child: Stack(
                   children: [
                     Positioned.fill(
-                      child:
-                          _buildResultImage(widget.inputImage.filePath),
+                      child: _buildResultImage(widget.inputImage.filePath),
                     ),
                     Positioned.fill(
                       child: Opacity(
@@ -484,7 +485,7 @@ class _ResultViewerState extends State<ResultViewer> {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -492,7 +493,8 @@ class _ResultViewerState extends State<ResultViewer> {
         children: [
           Row(
             children: [
-              Icon(Icons.assessment, size: 16, color: theme.colorScheme.primary),
+              Icon(Icons.assessment,
+                  size: 16, color: theme.colorScheme.primary),
               const SizedBox(width: 8),
               Text(
                 '质量评估指标',
@@ -513,8 +515,8 @@ class _ResultViewerState extends State<ResultViewer> {
             children: [
               _buildMetricChip(theme, 'PSNR',
                   '${metrics.psnr.toStringAsFixed(2)} dB', Icons.hdr_strong),
-              _buildMetricChip(theme, 'SSIM',
-                  metrics.ssim.toStringAsFixed(4), Icons.compare),
+              _buildMetricChip(theme, 'SSIM', metrics.ssim.toStringAsFixed(4),
+                  Icons.compare),
               if (metrics.lpips != null)
                 _buildMetricChip(theme, 'LPIPS',
                     metrics.lpips!.toStringAsFixed(4), Icons.visibility),
@@ -581,7 +583,9 @@ class _ResultViewerState extends State<ResultViewer> {
         return Icon(
           index < rating ? Icons.star : Icons.star_border,
           size: 16,
-          color: index < rating ? Colors.amber : theme.colorScheme.onSurfaceVariant,
+          color: index < rating
+              ? Colors.amber
+              : theme.colorScheme.onSurfaceVariant,
         );
       }),
     );
@@ -620,15 +624,15 @@ class _ResultViewerState extends State<ResultViewer> {
               ),
             ),
           const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.save_alt),
-            tooltip: '保存',
-            onPressed: () {},
+          const IconButton(
+            icon: Icon(Icons.save_alt),
+            tooltip: '保存功能未开放',
+            onPressed: null,
           ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            tooltip: '分享',
-            onPressed: () {},
+          const IconButton(
+            icon: Icon(Icons.share),
+            tooltip: '分享功能未开放',
+            onPressed: null,
           ),
           IconButton(
             icon: Icon(
@@ -706,6 +710,5 @@ class _LeftClipper extends CustomClipper<Rect> {
   }
 
   @override
-  bool shouldReclip(_LeftClipper oldClipper) =>
-      oldClipper.fraction != fraction;
+  bool shouldReclip(_LeftClipper oldClipper) => oldClipper.fraction != fraction;
 }

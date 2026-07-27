@@ -60,24 +60,28 @@ class EntityDetailPanel extends StatelessWidget {
                   children: [
                     // 关联实体
                     if (detail.relatedEntities.isNotEmpty) ...[
-                      _buildSectionTitle('关联实体 (${detail.relatedEntities.length})'),
-                      ...detail.relatedEntities.take(10).map(
-                        (e) => _RelatedEntityTile(
-                          entity: e,
-                          onTap: () => onEntityTap?.call(e.id),
-                        ),
+                      _buildSectionTitle(
+                        '关联实体 (${detail.relatedEntities.length})',
                       ),
+                      ...detail.relatedEntities.take(10).map(
+                            (e) => _RelatedEntityTile(
+                              entity: e,
+                              onTap: () => onEntityTap?.call(e.id),
+                            ),
+                          ),
                       if (detail.relatedEntities.length > 10)
-                        _buildLoadMoreButton(onEntityTap),
+                        _buildLoadMoreButton(),
                       const SizedBox(height: 16),
                     ],
 
                     // 时间线事件
                     if (detail.timelineEvents.isNotEmpty) ...[
-                      _buildSectionTitle('时间线事件 (${detail.timelineEvents.length})'),
-                      ...detail.timelineEvents.take(5).map(
-                        (e) => _TimelineTile(event: e),
+                      _buildSectionTitle(
+                        '时间线事件 (${detail.timelineEvents.length})',
                       ),
+                      ...detail.timelineEvents
+                          .take(5)
+                          .map((e) => _TimelineTile(event: e)),
                       if (detail.timelineEvents.length > 5)
                         _buildMoreButton('查看全部时间线事件'),
                       const SizedBox(height: 16),
@@ -85,10 +89,12 @@ class EntityDetailPanel extends StatelessWidget {
 
                     // 相关碑帖
                     if (detail.relatedDocuments.isNotEmpty) ...[
-                      _buildSectionTitle('相关碑帖 (${detail.relatedDocuments.length})'),
-                      ...detail.relatedDocuments.take(5).map(
-                        (doc) => _DocumentTile(document: doc),
+                      _buildSectionTitle(
+                        '相关碑帖 (${detail.relatedDocuments.length})',
                       ),
+                      ...detail.relatedDocuments
+                          .take(5)
+                          .map((doc) => _DocumentTile(document: doc)),
                       if (detail.relatedDocuments.length > 5)
                         _buildMoreButton('查看全部碑帖'),
                       const SizedBox(height: 16),
@@ -107,20 +113,20 @@ class EntityDetailPanel extends StatelessWidget {
                     _buildSectionTitle('图谱信息'),
                     _buildInfoRow('连接度数', '${detail.degree}'),
                     _buildInfoRow('关联深度', '${detail.depth}'),
-                    _buildInfoRow('置信度',
-                        '${(entity.confidence * 100).toStringAsFixed(1)}%'),
+                    _buildInfoRow(
+                      '置信度',
+                      '${(entity.confidence * 100).toStringAsFixed(1)}%',
+                    ),
 
-                    // 加载更多
+                    // 当前接口暂不支持分页加载，明确禁用入口，避免误导用户。
                     if (detail.hasMore)
                       Padding(
                         padding: const EdgeInsets.only(top: 12),
                         child: Center(
                           child: TextButton.icon(
                             icon: const Icon(Icons.expand_more),
-                            label: const Text('加载更多关联'),
-                            onPressed: () {
-                              // TODO: 加载更多关联实体/关系
-                            },
+                            label: const Text('加载更多关联（暂未开放）'),
+                            onPressed: null,
                           ),
                         ),
                       ),
@@ -142,9 +148,7 @@ class EntityDetailPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.withValues(alpha: 0.15),
-          ),
+          bottom: BorderSide(color: Colors.grey.withOpacity(0.15)),
         ),
       ),
       child: Row(
@@ -203,7 +207,7 @@ class EntityDetailPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: _typeColor(type).withValues(alpha: 0.15),
+        color: _typeColor(type).withOpacity(0.15),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -278,23 +282,25 @@ class EntityDetailPanel extends StatelessWidget {
           Text(label, style: const TextStyle(fontSize: 13)),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLoadMoreButton(Function(String)? onTap) {
+  Widget _buildLoadMoreButton() {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
-      child: TextButton(
-        onPressed: () {},
-        child: const Text('加载更多关联实体...',
-            style: TextStyle(fontSize: 13)),
+      child: Tooltip(
+        message: '加载更多功能暂未开放',
+        child: TextButton(
+          onPressed: null,
+          child: const Text(
+            '加载更多关联实体（暂未开放）',
+            style: TextStyle(fontSize: 13),
+          ),
+        ),
       ),
     );
   }
@@ -302,9 +308,12 @@ class EntityDetailPanel extends StatelessWidget {
   Widget _buildMoreButton(String text) {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
-      child: TextButton(
-        onPressed: () {},
-        child: Text(text, style: const TextStyle(fontSize: 13)),
+      child: Tooltip(
+        message: '$text功能暂未开放',
+        child: TextButton(
+          onPressed: null,
+          child: Text('$text（暂未开放）', style: const TextStyle(fontSize: 13)),
+        ),
       ),
     );
   }
@@ -313,29 +322,47 @@ class EntityDetailPanel extends StatelessWidget {
 
   String _typeLabel(EntityType type) {
     switch (type) {
-      case EntityType.person: return '人物';
-      case EntityType.location: return '地名';
-      case EntityType.official: return '官职';
-      case EntityType.dynasty: return '朝代';
-      case EntityType.document: return '文献';
-      case EntityType.event: return '事件';
-      case EntityType.organization: return '机构';
-      case EntityType.artifact: return '器物';
-      case EntityType.other: return '其他';
+      case EntityType.person:
+        return '人物';
+      case EntityType.location:
+        return '地名';
+      case EntityType.official:
+        return '官职';
+      case EntityType.dynasty:
+        return '朝代';
+      case EntityType.document:
+        return '文献';
+      case EntityType.event:
+        return '事件';
+      case EntityType.organization:
+        return '机构';
+      case EntityType.artifact:
+        return '器物';
+      case EntityType.other:
+        return '其他';
     }
   }
 
   Color _typeColor(EntityType type) {
     switch (type) {
-      case EntityType.person: return const Color(0xFFE74C3C);
-      case EntityType.location: return const Color(0xFF2ECC71);
-      case EntityType.official: return const Color(0xFFF39C12);
-      case EntityType.dynasty: return const Color(0xFF9B59B6);
-      case EntityType.document: return const Color(0xFF3498DB);
-      case EntityType.event: return const Color(0xFF1ABC9C);
-      case EntityType.organization: return const Color(0xFFE67E22);
-      case EntityType.artifact: return const Color(0xFFE91E63);
-      case EntityType.other: return const Color(0xFF95A5A6);
+      case EntityType.person:
+        return const Color(0xFFE74C3C);
+      case EntityType.location:
+        return const Color(0xFF2ECC71);
+      case EntityType.official:
+        return const Color(0xFFF39C12);
+      case EntityType.dynasty:
+        return const Color(0xFF9B59B6);
+      case EntityType.document:
+        return const Color(0xFF3498DB);
+      case EntityType.event:
+        return const Color(0xFF1ABC9C);
+      case EntityType.organization:
+        return const Color(0xFFE67E22);
+      case EntityType.artifact:
+        return const Color(0xFFE91E63);
+      case EntityType.other:
+        return const Color(0xFF95A5A6);
     }
   }
 }
@@ -382,10 +409,7 @@ class _RelatedEntityTile extends StatelessWidget {
                   if (entity.description.isNotEmpty)
                     Text(
                       entity.description,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -401,15 +425,24 @@ class _RelatedEntityTile extends StatelessWidget {
 
   Color _entityColor(EntityType type) {
     switch (type) {
-      case EntityType.person: return const Color(0xFFE74C3C);
-      case EntityType.location: return const Color(0xFF2ECC71);
-      case EntityType.official: return const Color(0xFFF39C12);
-      case EntityType.dynasty: return const Color(0xFF9B59B6);
-      case EntityType.document: return const Color(0xFF3498DB);
-      case EntityType.event: return const Color(0xFF1ABC9C);
-      case EntityType.organization: return const Color(0xFFE67E22);
-      case EntityType.artifact: return const Color(0xFFE91E63);
-      case EntityType.other: return const Color(0xFF95A5A6);
+      case EntityType.person:
+        return const Color(0xFFE74C3C);
+      case EntityType.location:
+        return const Color(0xFF2ECC71);
+      case EntityType.official:
+        return const Color(0xFFF39C12);
+      case EntityType.dynasty:
+        return const Color(0xFF9B59B6);
+      case EntityType.document:
+        return const Color(0xFF3498DB);
+      case EntityType.event:
+        return const Color(0xFF1ABC9C);
+      case EntityType.organization:
+        return const Color(0xFFE67E22);
+      case EntityType.artifact:
+        return const Color(0xFFE91E63);
+      case EntityType.other:
+        return const Color(0xFF95A5A6);
     }
   }
 }
@@ -430,7 +463,7 @@ class _TimelineTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: AppTheme.vermilion.withValues(alpha: 0.1),
+              color: AppTheme.vermilion.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -447,10 +480,7 @@ class _TimelineTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  event.title,
-                  style: const TextStyle(fontSize: 13),
-                ),
+                Text(event.title, style: const TextStyle(fontSize: 13)),
                 if (event.description.isNotEmpty)
                   Text(
                     event.description,
@@ -477,19 +507,19 @@ class _DocumentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: InkWell(
-        onTap: () {},
+      child: Tooltip(
+        message: '碑帖详情暂未开放',
         child: Row(
           children: [
             const Icon(Icons.auto_stories, size: 16, color: Color(0xFF3498DB)),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                document,
-                style: const TextStyle(fontSize: 13),
-              ),
+              child: Text(document, style: const TextStyle(fontSize: 13)),
             ),
-            const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+            const Text(
+              '暂未开放',
+              style: TextStyle(fontSize: 11, color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -507,56 +537,44 @@ class _ExternalRefTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: InkWell(
-        onTap: () {
-          if (reference.url.isNotEmpty) {
-            // TODO: 打开外部链接
-          }
-        },
-        child: Row(
-          children: [
-            Icon(
-              Icons.open_in_new,
-              size: 14,
-              color: AppTheme.vermilion.withValues(alpha: 0.7),
+      child: Row(
+        children: [
+          Icon(Icons.link_off, size: 14, color: Colors.grey[500]),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  reference.name.isNotEmpty
+                      ? reference.name
+                      : reference.externalId,
+                  style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                ),
+                Text(
+                  '${_kbLabel(reference.source)} · 外部跳转暂未开放',
+                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    reference.name.isNotEmpty
-                        ? reference.name
-                        : reference.externalId,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppTheme.vermilion,
-                    ),
-                  ),
-                  Text(
-                    _kbLabel(reference.source),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey[500],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   String _kbLabel(ExternalKb kb) {
     switch (kb) {
-      case ExternalKb.wikidata: return 'Wikidata';
-      case ExternalKb.ctext: return '中国哲学书电子化计划';
-      case ExternalKb.cbdb: return '中国历代人物传记资料库';
-      case ExternalKb.wikipedia: return '维基百科';
-      case ExternalKb.baiduBaike: return '百度百科';
+      case ExternalKb.wikidata:
+        return 'Wikidata';
+      case ExternalKb.ctext:
+        return '中国哲学书电子化计划';
+      case ExternalKb.cbdb:
+        return '中国历代人物传记资料库';
+      case ExternalKb.wikipedia:
+        return '维基百科';
+      case ExternalKb.baiduBaike:
+        return '百度百科';
     }
   }
 }

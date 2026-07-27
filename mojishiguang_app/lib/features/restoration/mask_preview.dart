@@ -1,26 +1,16 @@
-/// 墨迹时光 · AI 残片修复大师 — 破损 Mask 叠加预览组件
-///
-/// 支持原图与破损掩码的叠加显示，用不同颜色高亮不同类型的破损区域。
-/// 提供缩放/平移手势和可信度热力图切换。
-///
-/// 集成论文技术：
-/// - LaMa (Suvorov et al., 2022): 大掩码可视化
-/// - DeepFL (Jin et al., 2021): 破损区域分类与可视化
-/// - PartialConv (Liu et al., 2018): 不规则掩码展示
-/// - GatedConv (Yu et al., 2019): 掩码类型区分
-///
-/// 破损类型颜色映射：
-///   - 🔴 红色: 撕裂/划痕 (tear)
-///   - 🟢 绿色: 污渍/霉斑 (stain)
-///   - 🔵 蓝色: 褪色 (fading)
-///   - 🟡 黄色: 折痕 (crease)
-///   - 🟣 紫色: 缺块 (hole)
-///   - 🟤 棕色: 水渍 (waterDamage)
-///   - ⚫ 灰色: 墨迹晕染 (inkBleed)
-///   - 🟠 橙色: 泛黄 (yellowing)
-///   - ⚪ 白色: 字符残缺 (characterLoss)
+// 墨迹时光 · AI 残片修复大师 — 破损 Mask 叠加预览组件
+//
+// 支持原图与破损掩码的叠加显示，用不同颜色高亮不同类型的破损区域。
+// 提供缩放/平移手势。
+//
+// 集成论文技术：
+// - LaMa (Suvorov et al., 2022): 大掩码可视化
+// - DeepFL (Jin et al., 2021): 破损区域分类与可视化
+// - PartialConv (Liu et al., 2018): 不规则掩码展示
+// - GatedConv (Yu et al., 2019): 掩码类型区分
 
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../models/restoration/damage_mask.dart';
 import '../../models/restoration/input_image.dart';
@@ -28,7 +18,7 @@ import '../../models/restoration/input_image.dart';
 /// 破损 Mask 叠加预览组件
 ///
 /// 在图片上叠加半透明 Mask 图层，以颜色编码标识不同破损类型。
-/// 支持手势缩放平移查看细节，可切换置信度热力图模式。
+/// 支持手势缩放平移查看细节。
 class MaskPreview extends StatefulWidget {
   /// 输入的原图
   final InputImage inputImage;
@@ -55,7 +45,7 @@ class MaskPreview extends StatefulWidget {
 }
 
 class _MaskPreviewState extends State<MaskPreview> {
-  /// 视图模式：叠加 / 原图 / 掩码 / 热力图
+  /// 视图模式：叠加 / 原图 / 掩码
   ViewMode _viewMode = ViewMode.overlay;
 
   /// 掩码透明度
@@ -101,9 +91,7 @@ class _MaskPreviewState extends State<MaskPreview> {
         const SizedBox(height: 12),
 
         // 图片区域
-        Expanded(
-          child: _buildImagePreviewArea(theme),
-        ),
+        Expanded(child: _buildImagePreviewArea(theme)),
 
         // 控制条
         _buildControlBar(theme),
@@ -160,27 +148,22 @@ class _MaskPreviewState extends State<MaskPreview> {
         child: Stack(
           children: [
             // 原图
-            Positioned.fill(
-              child: _buildImage(),
-            ),
+            Positioned.fill(child: _buildImage()),
             // Mask 叠加
             if (widget.damageMask != null)
-              Positioned.fill(
-                child: _buildMaskOverlay(theme),
-              ),
+              Positioned.fill(child: _buildMaskOverlay(theme)),
             // 信息标签
             Positioned(
               left: 8,
               top: 8,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '破损率: ${(widget.damageMask?.damageRatio ?? 0 * 100).toStringAsFixed(1)}%',
+                  '破损率: ${(_damageRatio(widget.damageMask) * 100).toStringAsFixed(1)}%',
                   style: const TextStyle(color: Colors.white, fontSize: 11),
                 ),
               ),
@@ -194,10 +177,10 @@ class _MaskPreviewState extends State<MaskPreview> {
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: IconButton(
-                  icon: const Icon(Icons.open_in_full,
-                      size: 16, color: Colors.white),
-                  onPressed: () {},
+                child: const IconButton(
+                  icon: Icon(Icons.open_in_full, size: 16, color: Colors.white),
+                  tooltip: '展开预览功能未开放',
+                  onPressed: null,
                 ),
               ),
             ),
@@ -217,7 +200,7 @@ class _MaskPreviewState extends State<MaskPreview> {
             color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(Icons.detective, color: theme.colorScheme.primary),
+          child: Icon(Icons.search, color: theme.colorScheme.primary),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -233,7 +216,7 @@ class _MaskPreviewState extends State<MaskPreview> {
               const SizedBox(height: 2),
               Text(
                 widget.damageMask != null
-                    ? '检测到 ${widget.damageMask!.regionCount} 处破损区域，'
+                    ? '检测到 ${widget.damageMask!.regions.length} 处破损区域，'
                         '以颜色编码标识不同类型'
                     : '正在分析图片中的破损情况...',
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -256,19 +239,17 @@ class _MaskPreviewState extends State<MaskPreview> {
         _buildViewModeChip(theme, ViewMode.original, Icons.image, '原图'),
         const SizedBox(width: 8),
         _buildViewModeChip(theme, ViewMode.mask, Icons.auto_fix_high, '掩码'),
-        if (widget.damageMask?.confidenceHeatmapPath != null)
-          Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: _buildViewModeChip(
-                theme, ViewMode.heatmap, Icons.grid_on, '热力图'),
-          ),
       ],
     );
   }
 
   /// 单个视图模式芯片
   Widget _buildViewModeChip(
-      ThemeData theme, ViewMode mode, IconData icon, String label) {
+    ThemeData theme,
+    ViewMode mode,
+    IconData icon,
+    String label,
+  ) {
     final isSelected = _viewMode == mode;
     return FilterChip(
       label: Text(label, style: const TextStyle(fontSize: 12)),
@@ -297,18 +278,8 @@ class _MaskPreviewState extends State<MaskPreview> {
               Positioned.fill(child: _buildImage()),
 
               // Mask 叠加层
-              if (_viewMode == ViewMode.overlay ||
-                  _viewMode == ViewMode.mask)
-                Positioned.fill(
-                  child: _buildMaskOverlay(theme),
-                ),
-
-              // 热力图
-              if (_viewMode == ViewMode.heatmap &&
-                  widget.damageMask?.confidenceHeatmapPath != null)
-                Positioned.fill(
-                  child: _buildHeatmap(theme),
-                ),
+              if (_viewMode == ViewMode.overlay || _viewMode == ViewMode.mask)
+                Positioned.fill(child: _buildMaskOverlay(theme)),
             ],
           ),
         ),
@@ -335,27 +306,20 @@ class _MaskPreviewState extends State<MaskPreview> {
 
     // 当模式为"掩码"时，只显示掩码层（黑色背景 + 彩色破损标记）
     if (_viewMode == ViewMode.mask) {
-      return Container(
-        color: Colors.black87,
-        child: _buildMaskFile(theme),
-      );
+      return Container(color: Colors.black87, child: _buildMaskFile(theme));
     }
 
-    return Opacity(
-      opacity: _maskOpacity,
-      child: _buildMaskFile(theme),
-    );
+    return Opacity(opacity: _maskOpacity, child: _buildMaskFile(theme));
   }
 
-  /// 加载掩码文件
+  /// 加载掩码字节
   Widget _buildMaskFile(ThemeData theme) {
-    return Image.file(
-      File(widget.damageMask!.maskFilePath),
+    return Image.memory(
+      widget.damageMask!.maskBytes,
       fit: BoxFit.contain,
       color: theme.colorScheme.primary.withValues(alpha: 0.3),
       colorBlendMode: BlendMode.overlay,
       errorBuilder: (context, error, stackTrace) {
-        // 如果掩码文件不存在，用半透明色块模拟
         return Container(
           decoration: BoxDecoration(
             border: Border.all(
@@ -365,28 +329,8 @@ class _MaskPreviewState extends State<MaskPreview> {
           ),
           child: Center(
             child: Text(
-              '掩码文件加载中...',
+              '掩码数据无法预览',
               style: TextStyle(color: theme.colorScheme.error),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  /// 热力图
-  Widget _buildHeatmap(ThemeData theme) {
-    return Image.file(
-      File(widget.damageMask!.confidenceHeatmapPath!),
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.transparent,
-                theme.colorScheme.error.withValues(alpha: 0.5),
-              ],
             ),
           ),
         );
@@ -401,12 +345,14 @@ class _MaskPreviewState extends State<MaskPreview> {
       child: Row(
         children: [
           // 透明度滑块
-          Icon(Icons.opacity, size: 16, color: theme.colorScheme.onSurfaceVariant),
+          Icon(
+            Icons.opacity,
+            size: 16,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
           Expanded(
             child: Slider(
               value: _maskOpacity,
-              min: 0.0,
-              max: 1.0,
               divisions: 20,
               label: '透明度 ${(_maskOpacity * 100).toInt()}%',
               onChanged: (v) => setState(() => _maskOpacity = v),
@@ -428,14 +374,14 @@ class _MaskPreviewState extends State<MaskPreview> {
               size: 20,
             ),
             tooltip: '显示统计',
-            onPressed: () =>
-                setState(() => _showStatistics = !_showStatistics),
+            onPressed: () => setState(() => _showStatistics = !_showStatistics),
           ),
           // 重置缩放
           IconButton(
             icon: const Icon(Icons.fit_screen, size: 20),
             tooltip: '适应屏幕',
-            onPressed: () => _transformationController.value = Matrix4.identity(),
+            onPressed: () =>
+                _transformationController.value = Matrix4.identity(),
           ),
         ],
       ),
@@ -444,8 +390,8 @@ class _MaskPreviewState extends State<MaskPreview> {
 
   /// 破损类型图例
   Widget _buildLegend(ThemeData theme) {
-    final damageTypes = widget.damageMask?.damageTypeDistribution ?? {};
-    if (damageTypes.isEmpty) return const SizedBox.shrink();
+    final damageMask = widget.damageMask;
+    if (damageMask == null) return const SizedBox.shrink();
 
     return Container(
       margin: const EdgeInsets.only(top: 8),
@@ -454,32 +400,26 @@ class _MaskPreviewState extends State<MaskPreview> {
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 6,
-        children: damageTypes.entries.map((entry) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: _damageTypeColor(entry.key),
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '${_damageTypeLabel(entry.key)} ${(entry.value * 100).toStringAsFixed(0)}%',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          );
-        }).toList(),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: _damageTypeColor(damageMask.damageType),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            _damageTypeLabel(damageMask.damageType),
+            style: TextStyle(
+              fontSize: 11,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -495,19 +435,26 @@ class _MaskPreviewState extends State<MaskPreview> {
       ),
       child: Row(
         children: [
-          _buildStatItem(theme, '破损区域', '${mask.regionCount}', Icons.pin_drop),
+          _buildStatItem(
+            theme,
+            '破损区域',
+            '${mask.regions.length}',
+            Icons.pin_drop,
+          ),
           _buildStatDivider(theme),
           _buildStatItem(
-              theme,
-              '破损占比',
-              '${(mask.damageRatio * 100).toStringAsFixed(1)}%',
-              Icons.pie_chart),
+            theme,
+            '破损占比',
+            '${(_damageRatio(mask) * 100).toStringAsFixed(1)}%',
+            Icons.pie_chart,
+          ),
           _buildStatDivider(theme),
           _buildStatItem(
-              theme,
-              '平均置信度',
-              '${(mask.regionConfidences.isEmpty ? 0 : mask.regionConfidences.reduce((a, b) => a + b) / mask.regionConfidences.length * 100).toStringAsFixed(0)}%',
-              Icons.verified),
+            theme,
+            '平均置信度',
+            '${(mask.confidence * 100).toStringAsFixed(0)}%',
+            Icons.verified,
+          ),
         ],
       ),
     );
@@ -515,7 +462,11 @@ class _MaskPreviewState extends State<MaskPreview> {
 
   /// 统计单项
   Widget _buildStatItem(
-      ThemeData theme, String label, String value, IconData icon) {
+    ThemeData theme,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     return Expanded(
       child: Column(
         children: [
@@ -541,6 +492,17 @@ class _MaskPreviewState extends State<MaskPreview> {
     );
   }
 
+  double _damageRatio(DamageMask? mask) {
+    if (mask == null || mask.width <= 0 || mask.height <= 0) return 0;
+
+    final totalPixels = mask.width * mask.height;
+    final damagedPixels = mask.regions.fold<double>(
+      0,
+      (sum, region) => sum + region.area,
+    );
+    return (damagedPixels / totalPixels).clamp(0.0, 1.0).toDouble();
+  }
+
   Widget _buildStatDivider(ThemeData theme) {
     return Container(
       width: 1,
@@ -552,25 +514,15 @@ class _MaskPreviewState extends State<MaskPreview> {
   /// 破损类型 → 颜色映射
   Color _damageTypeColor(DamageType type) {
     switch (type) {
-      case DamageType.tear:
+      case DamageType.wormEaten:
         return Colors.red;
-      case DamageType.stain:
-        return Colors.green;
-      case DamageType.fading:
-        return Colors.blue;
-      case DamageType.crease:
-        return Colors.amber;
-      case DamageType.hole:
-        return Colors.purple;
-      case DamageType.waterDamage:
+      case DamageType.waterStain:
         return Colors.brown;
-      case DamageType.inkBleed:
-        return Colors.grey;
-      case DamageType.yellowing:
-        return Colors.orange;
-      case DamageType.characterLoss:
-        return Colors.white;
-      case DamageType.unknown:
+      case DamageType.missingCorner:
+        return Colors.purple;
+      case DamageType.foldCrack:
+        return Colors.amber;
+      case DamageType.fuzzy:
         return Colors.grey;
     }
   }
@@ -578,26 +530,16 @@ class _MaskPreviewState extends State<MaskPreview> {
   /// 破损类型 → 显示名称
   String _damageTypeLabel(DamageType type) {
     switch (type) {
-      case DamageType.tear:
-        return '撕裂';
-      case DamageType.stain:
-        return '污渍';
-      case DamageType.fading:
-        return '褪色';
-      case DamageType.crease:
-        return '折痕';
-      case DamageType.hole:
-        return '缺块';
-      case DamageType.waterDamage:
+      case DamageType.wormEaten:
+        return '虫蛀';
+      case DamageType.waterStain:
         return '水渍';
-      case DamageType.inkBleed:
-        return '晕染';
-      case DamageType.yellowing:
-        return '泛黄';
-      case DamageType.characterLoss:
-        return '字符残缺';
-      case DamageType.unknown:
-        return '未知';
+      case DamageType.missingCorner:
+        return '缺角';
+      case DamageType.foldCrack:
+        return '折裂';
+      case DamageType.fuzzy:
+        return '模糊';
     }
   }
 }
@@ -612,7 +554,4 @@ enum ViewMode {
 
   /// 仅掩码
   mask,
-
-  /// 置信度热力图
-  heatmap,
 }

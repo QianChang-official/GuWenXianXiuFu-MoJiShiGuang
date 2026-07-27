@@ -59,21 +59,26 @@ class EntityDetailScreen extends ConsumerWidget {
 
             // ─── 关联实体列表 ────────────────────────────────
             if (detail.relatedEntities.isNotEmpty) ...[
-              _buildSectionTitle(theme, '关联实体 (${detail.relatedEntities.length})'),
+              _buildSectionTitle(
+                theme,
+                '关联实体 (${detail.relatedEntities.length})',
+              ),
               const SizedBox(height: 8),
               ...detail.relatedEntities.take(10).map(
-                (relatedEntity) => _RelatedEntityTile(
-                  entity: relatedEntity,
-                  onTap: () {
-                    ref.read(kgProvider.notifier).expandEntity(relatedEntity);
-                  },
-                ),
-              ),
+                    (relatedEntity) => _RelatedEntityTile(
+                      entity: relatedEntity,
+                      onTap: () {
+                        ref
+                            .read(kgProvider.notifier)
+                            .expandEntity(relatedEntity);
+                      },
+                    ),
+                  ),
               if (detail.relatedEntities.length > 10)
                 Center(
-                  child: TextButton(
-                    onPressed: () {},
-                    child: const Text('加载更多关联实体...'),
+                  child: const TextButton(
+                    onPressed: null,
+                    child: Text('更多关联实体暂未开放'),
                   ),
                 ),
               const SizedBox(height: 16),
@@ -81,16 +86,19 @@ class EntityDetailScreen extends ConsumerWidget {
 
             // ─── 时间线事件 ──────────────────────────────────
             if (detail.timelineEvents.isNotEmpty) ...[
-              _buildSectionTitle(theme, '时间线事件 (${detail.timelineEvents.length})'),
-              const SizedBox(height: 8),
-              ...detail.timelineEvents.take(5).map(
-                (event) => _TimelineEventTile(event: event),
+              _buildSectionTitle(
+                theme,
+                '时间线事件 (${detail.timelineEvents.length})',
               ),
+              const SizedBox(height: 8),
+              ...detail.timelineEvents
+                  .take(5)
+                  .map((event) => _TimelineEventTile(event: event)),
               if (detail.timelineEvents.length > 5)
                 Center(
-                  child: TextButton(
-                    onPressed: () {},
-                    child: const Text('查看全部时间线事件'),
+                  child: const TextButton(
+                    onPressed: null,
+                    child: Text('完整时间线暂未开放'),
                   ),
                 ),
               const SizedBox(height: 16),
@@ -98,11 +106,14 @@ class EntityDetailScreen extends ConsumerWidget {
 
             // ─── 相关碑帖 ────────────────────────────────────
             if (detail.relatedDocuments.isNotEmpty) ...[
-              _buildSectionTitle(theme, '相关碑帖 (${detail.relatedDocuments.length})'),
-              const SizedBox(height: 8),
-              ...detail.relatedDocuments.take(5).map(
-                (doc) => _RelatedDocumentTile(document: doc),
+              _buildSectionTitle(
+                theme,
+                '相关碑帖 (${detail.relatedDocuments.length})',
               ),
+              const SizedBox(height: 8),
+              ...detail.relatedDocuments
+                  .take(5)
+                  .map((doc) => _RelatedDocumentTile(document: doc)),
               const SizedBox(height: 16),
             ],
 
@@ -128,7 +139,10 @@ class EntityDetailScreen extends ConsumerWidget {
                     const Divider(height: 16),
                     _infoRow('关联深度', '${detail.depth}'),
                     const Divider(height: 16),
-                    _infoRow('置信度', '${(entity.confidence * 100).toStringAsFixed(1)}%'),
+                    _infoRow(
+                      '置信度',
+                      '${(entity.confidence * 100).toStringAsFixed(1)}%',
+                    ),
                   ],
                 ),
               ),
@@ -191,8 +205,11 @@ class EntityDetailScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.schedule, size: 16,
-                      color: theme.colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.schedule,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     entity.timeInfo,
@@ -216,7 +233,7 @@ class EntityDetailScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -247,10 +264,7 @@ class EntityDetailScreen extends ConsumerWidget {
         Text(label, style: const TextStyle(fontSize: 13)),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -322,18 +336,19 @@ class _RelatedEntityTile extends StatelessWidget {
         leading: Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        title: Text(entity.name,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        title: Text(
+          entity.name,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        ),
         subtitle: entity.description.isNotEmpty
             ? Text(
                 entity.description,
                 style: TextStyle(
-                    fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               )
@@ -387,10 +402,9 @@ class _TimelineEventTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppTheme.vermilion.withValues(alpha: 0.1),
+                  color: AppTheme.vermilion.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -410,7 +424,9 @@ class _TimelineEventTile extends StatelessWidget {
                     Text(
                       event.title,
                       style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w500),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     if (event.description.isNotEmpty) ...[
                       const SizedBox(height: 2),
@@ -447,12 +463,17 @@ class _RelatedDocumentTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 6),
       child: ListTile(
         dense: true,
-        leading: const Icon(Icons.auto_stories,
-            size: 18, color: Color(0xFF3498DB)),
-        title: Text(document,
-            style: const TextStyle(fontSize: 13)),
-        trailing: const Icon(Icons.chevron_right, size: 16),
-        onTap: () {},
+        leading: const Icon(
+          Icons.auto_stories,
+          size: 18,
+          color: Color(0xFF3498DB),
+        ),
+        title: Text(document, style: const TextStyle(fontSize: 13)),
+        trailing: const Tooltip(
+          message: '碑帖详情暂未开放',
+          child: Icon(Icons.lock_outline, size: 16),
+        ),
+        onTap: null,
       ),
     );
   }
@@ -470,21 +491,21 @@ class _ExternalRefTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 6),
       child: ListTile(
         dense: true,
-        leading: Icon(Icons.open_in_new,
-            size: 18, color: AppTheme.vermilion.withValues(alpha: 0.7)),
+        leading: Icon(
+          Icons.open_in_new,
+          size: 18,
+          color: AppTheme.vermilion.withOpacity(0.7),
+        ),
         title: Text(
           reference.name.isNotEmpty ? reference.name : reference.externalId,
-          style: const TextStyle(
-            fontSize: 13,
-            color: AppTheme.vermilion,
-          ),
+          style: const TextStyle(fontSize: 13, color: AppTheme.vermilion),
         ),
         subtitle: Text(
-          _kbLabel(reference.source),
+          '${_kbLabel(reference.source)} · 外部链接打开暂未开放',
           style: const TextStyle(fontSize: 11),
         ),
-        trailing: const Icon(Icons.chevron_right, size: 16),
-        onTap: () {},
+        trailing: const Icon(Icons.lock_outline, size: 16),
+        onTap: null,
       ),
     );
   }

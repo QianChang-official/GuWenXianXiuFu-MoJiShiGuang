@@ -2,106 +2,136 @@ name: Flutter CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build:
-    name: Build & Analyze
+  quality:
+    name: Generate, Analyze & Test
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x'
-          channel: 'stable'
+          flutter-version: '3.44.7'
+          channel: stable
           cache: true
-      
+
       - name: Install dependencies
         run: flutter pub get
         working-directory: mojishiguang_app
-      
-      - name: Generate freezed & json_serializable code
+
+      - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
         working-directory: mojishiguang_app
-      
+
       - name: Analyze project
-        run: flutter analyze
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
         working-directory: mojishiguang_app
-        continue-on-error: true
-      
-      - name: Run tests
-        run: flutter test
+
+      - name: Run tests when present
         working-directory: mojishiguang_app
-        continue-on-error: true
+        run: |
+          if find test -type f -name '*_test.dart' -print -quit 2>/dev/null | grep -q .; then
+            flutter test
+          else
+            echo "::notice::No Flutter tests found; skipping test execution."
+          fi
 
   build_ios:
-    name: Build iOS
+    name: Build iOS When Project Is Complete
     runs-on: macos-latest
-    needs: build
-    
+    needs: quality
+
     steps:
       - uses: actions/checkout@v4
-      
+
+      - name: Check iOS project availability
+        id: ios_project
+        working-directory: mojishiguang_app
+        run: |
+          if [ ! -f ios/Runner.xcodeproj/project.pbxproj ]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::The iOS Xcode project is incomplete; no iOS artifact is built."
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Flutter
+        if: steps.ios_project.outputs.available == 'true'
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x'
-          channel: 'stable'
+          flutter-version: '3.44.7'
+          channel: stable
           cache: true
-      
+
       - name: Install dependencies
+        if: steps.ios_project.outputs.available == 'true'
         run: flutter pub get
         working-directory: mojishiguang_app
-      
+
+      - name: Generate code
+        if: steps.ios_project.outputs.available == 'true'
+        run: dart run build_runner build --delete-conflicting-outputs
+        working-directory: mojishiguang_app
+
       - name: Build iOS
+        if: steps.ios_project.outputs.available == 'true'
         run: flutter build ios --no-codesign --release
         working-directory: mojishiguang_app
 
   build_android:
     name: Build Android
     runs-on: ubuntu-latest
-    needs: build
-    
+    needs: quality
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x'
-          channel: 'stable'
+          flutter-version: '3.44.7'
+          channel: stable
           cache: true
-      
+
       - name: Install dependencies
         run: flutter pub get
         working-directory: mojishiguang_app
-      
+
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+        working-directory: mojishiguang_app
+
       - name: Build Android
         run: flutter build apk --release
         working-directory: mojishiguang_app
 
-  build_harmonyos:
-    name: Build HarmonyOS
+  check_harmonyos:
+    name: Check HarmonyOS Project Availability & Structure
     runs-on: ubuntu-latest
-    needs: build
-    
+    needs: quality
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x'
-          channel: 'stable'
+          flutter-version: '3.44.7'
+          channel: stable
           cache: true
-      
-      - name: Validate HarmonyOS project structure
-        run: |
-          echo "HarmonyOS build requires DevEco Studio"
-          echo "See harmonyos/ directory for project files"
+
+      - name: Check HarmonyOS project structure
         working-directory: mojishiguang_app
+        run: |
+          if [ ! -d harmonyos ]; then
+            echo "::notice::HarmonyOS project is not included; no HarmonyOS artifact is built."
+            exit 0
+          fi
+          test -f harmonyos/entry/build-profile.json5
+          test -f harmonyos/entry/src/main/resources/module.json5

@@ -66,7 +66,7 @@ class CameraService {
     // 2. 四边形轮廓查找
     // 3. 透视校正（四点变换）
     // 4. 对比度增强（CLAHE）
-    return InputImage(file: file);
+    return InputImage(file: File(file.path));
   }
 
   /// 微距拍摄模式：用于拍摄碑帖细节纹理。
@@ -80,7 +80,7 @@ class CameraService {
     }
     final file = await controller.takePicture();
     // TODO: 微距专用后处理
-    return InputImage(file: file);
+    return InputImage(file: File(file.path));
   }
 
   /// 连拍模式：多帧合成提高画质。
@@ -91,7 +91,7 @@ class CameraService {
     final images = <InputImage>[];
     for (int i = 0; i < count; i++) {
       final file = await _controller!.takePicture();
-      images.add(InputImage(file: file));
+      images.add(InputImage(file: File(file.path)));
       // 帧间间隔 100ms
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -110,7 +110,7 @@ class CameraService {
     // 3. 过曝帧 (+2 EV)
     // 4. HDR 合成（曝光融合算法）
     final file = await _controller!.takePicture();
-    return InputImage(file: file);
+    return InputImage(file: File(file.path));
   }
 
   /// 图像预处理管线：将拍摄的图像转为 AI 模型所需的输入格式。

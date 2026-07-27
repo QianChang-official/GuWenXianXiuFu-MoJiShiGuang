@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../core/utils/json_converters.dart';
 
 part 'style_transfer_result.freezed.dart';
 part 'style_transfer_result.g.dart';
@@ -9,13 +10,13 @@ part 'style_transfer_result.g.dart';
 class StyleTransferResult with _$StyleTransferResult {
   const factory StyleTransferResult({
     /// 原图字节
-    required Uint8List originalImageBytes,
+    @Uint8ListConverter() required Uint8List originalImageBytes,
 
     /// 风格化结果图字节
-    required Uint8List stylizedImageBytes,
+    @Uint8ListConverter() required Uint8List stylizedImageBytes,
 
     /// 笔触对比图字节（可选）
-    Uint8List? strokeComparisonBytes,
+    @NullableUint8ListConverter() Uint8List? strokeComparisonBytes,
 
     /// 结果图片宽度
     required int width,
@@ -63,7 +64,7 @@ class StyleOption with _$StyleOption {
     required String scriptStyle,
 
     /// 风格预览图字节
-    Uint8List? previewBytes,
+    @NullableUint8ListConverter() Uint8List? previewBytes,
 
     /// 风格标签
     List<String>? tags,

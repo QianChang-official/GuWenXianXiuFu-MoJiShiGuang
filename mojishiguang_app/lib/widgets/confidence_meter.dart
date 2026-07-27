@@ -43,7 +43,8 @@ class ConfidenceMeter extends StatelessWidget {
     if (value >= 0.7) return gradientColors.last;
     // 在中间范围插值
     final double t = (value - 0.3) / 0.4;
-    return Color.lerp(gradientColors[0], gradientColors[1], t * 2) ?? gradientColors[1];
+    return Color.lerp(gradientColors[0], gradientColors[1], t * 2) ??
+        gradientColors[1];
   }
 
   @override
@@ -135,7 +136,8 @@ class _ConfidencePainter extends CustomPainter {
 
     // ── 前景圆弧 ──
     if (value > 0) {
-      final Rect rect = Rect.fromCircle(center: Offset(centerX, centerY), radius: radius);
+      final Rect rect =
+          Rect.fromCircle(center: Offset(centerX, centerY), radius: radius);
       final Gradient gradient = SweepGradient(
         startAngle: -math.pi / 2,
         endAngle: -math.pi / 2 + math.pi * 2,
@@ -288,7 +290,7 @@ class _RadarPainter extends CustomPainter {
 
     // ── 数据区域 ──
     final Paint dataPaint = Paint()
-      ..color = const Color(0xFFC04040).withValues(alpha: 0.3)
+      ..color = const Color(0xFFC04040).withOpacity(0.3)
       ..style = PaintingStyle.fill;
 
     final Path dataPath = Path();

@@ -19,6 +19,7 @@
 
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../models/style_models.dart';
 
@@ -101,9 +102,20 @@ class StylizationApiService {
         data: formData,
       );
 
-      return StyleTransferResult.fromJson(
+      final data = Map<String, dynamic>.from(
         response.data as Map<String, dynamic>,
       );
+      final resultLocation =
+          (data['resultUrl'] ?? data['result_url'] ?? data['resultPath'] ??
+                  data['result_path'])
+              as String?;
+      if (resultLocation == null || resultLocation.isEmpty) {
+        throw const StylizationApiException('服务端未返回风格化结果图片');
+      }
+
+      data['resultUrl'] = resultLocation;
+      data['resultPath'] = await _materializeResultImage(resultLocation);
+      return StyleTransferResult.fromJson(data);
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -239,6 +251,32 @@ class StylizationApiService {
       );
     }
     throw const StylizationApiException('图片文件路径为空');
+  }
+
+  /// 将服务端风格化结果下载到临时目录，确保 UI 使用真实本地文件。
+  Future<String> _materializeResultImage(String resultLocation) async {
+    final uri = Uri.tryParse(resultLocation);
+    if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
+      if (await File(resultLocation).exists()) {
+        return resultLocation;
+      }
+      throw const StylizationApiException('服务端返回的风格化结果路径无效');
+    }
+
+    final directory = await getTemporaryDirectory();
+    final extension = _imageExtension(uri.path);
+    final filePath =
+        '${directory.path}${Platform.pathSeparator}stylization_${DateTime.now().microsecondsSinceEpoch}$extension';
+    await _dio.downloadUri(uri, filePath);
+    return filePath;
+  }
+
+  String _imageExtension(String path) {
+    final dotIndex = path.lastIndexOf('.');
+    if (dotIndex == -1) return '.jpg';
+    final extension = path.substring(dotIndex).toLowerCase();
+    const supportedExtensions = {'.jpg', '.jpeg', '.png', '.webp'};
+    return supportedExtensions.contains(extension) ? extension : '.jpg';
   }
 
   /// 统一错误处理

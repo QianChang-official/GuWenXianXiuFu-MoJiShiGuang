@@ -11,20 +11,25 @@ class AppTheme {
 
   /// 朱红色 - 主色 (古代印章色)
   static const Color vermilion = Color(0xFFC04040);
+
   /// 朱红色浅色
   static const Color vermilionLight = Color(0xFFD97070);
+
   /// 朱红色深色
   static const Color vermilionDark = Color(0xFF8B2E2E);
 
   /// 宣纸米黄色 - 辅色
   static const Color paperYellow = Color(0xFFF5E6C8);
+
   /// 宣纸色浅色
   static const Color paperYellowLight = Color(0xFFFAF3E0);
+
   /// 宣纸色深色
   static const Color paperYellowDark = Color(0xFFE8D5A8);
 
   /// 墨黑色 - 强调色
   static const Color inkBlack = Color(0xFF1A1A1A);
+
   /// 墨黑色浅色
   static const Color inkBlackLight = Color(0xFF333333);
 
@@ -74,9 +79,9 @@ class AppTheme {
       ),
 
       // ── Card ──
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
-        shadowColor: inkBlack.withValues(alpha: 0.1),
+        shadowColor: inkBlack.withOpacity(0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -88,7 +93,7 @@ class AppTheme {
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
         selectedItemColor: vermilion,
-        unselectedItemColor: inkBlackLight.withValues(alpha: 0.6),
+        unselectedItemColor: inkBlackLight.withOpacity(0.6),
         type: BottomNavigationBarType.fixed,
         elevation: 8,
         selectedLabelStyle: const TextStyle(
@@ -103,9 +108,9 @@ class AppTheme {
       ),
 
       // ── TabBar ──
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: vermilion,
-        unselectedLabelColor: inkBlackLight.withValues(alpha: 0.6),
+        unselectedLabelColor: inkBlackLight.withOpacity(0.6),
         labelStyle: const TextStyle(
           fontFamily: 'SourceHanSerifSC',
           fontSize: 14,
@@ -160,11 +165,11 @@ class AppTheme {
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: inkBlackLight.withValues(alpha: 0.2)),
+          borderSide: BorderSide(color: inkBlackLight.withOpacity(0.2)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: inkBlackLight.withValues(alpha: 0.2)),
+          borderSide: BorderSide(color: inkBlackLight.withOpacity(0.2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -180,7 +185,7 @@ class AppTheme {
         ),
         hintStyle: TextStyle(
           fontFamily: 'SourceHanSerifSC',
-          color: inkBlackLight.withValues(alpha: 0.5),
+          color: inkBlackLight.withOpacity(0.5),
         ),
       ),
 
@@ -199,7 +204,7 @@ class AppTheme {
       ),
 
       // ── Dialog ──
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -221,7 +226,7 @@ class AppTheme {
 
       // ── Divider ──
       dividerTheme: DividerThemeData(
-        color: inkBlackLight.withValues(alpha: 0.12),
+        color: inkBlackLight.withOpacity(0.12),
         thickness: 1,
         space: 1,
       ),
@@ -255,9 +260,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: const Color(0xFF1E1E1E),
-
       textTheme: _buildTextTheme(),
-
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
@@ -270,17 +273,15 @@ class AppTheme {
           color: Color(0xFFE0E0E0),
         ),
       ),
-
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
-        shadowColor: Colors.black.withValues(alpha: 0.3),
+        shadowColor: Colors.black.withOpacity(0.3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         color: const Color(0xFF2C2C2C),
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       ),
-
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: const Color(0xFF2C2C2C),
         selectedItemColor: vermilionLight,
@@ -297,8 +298,7 @@ class AppTheme {
           fontSize: 12,
         ),
       ),
-
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: vermilionLight,
         unselectedLabelColor: const Color(0xFF9E9E9E),
         labelStyle: const TextStyle(
@@ -313,7 +313,6 @@ class AppTheme {
         indicatorColor: vermilionLight,
         indicatorSize: TabBarIndicatorSize.tab,
       ),
-
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: vermilionLight,
@@ -330,7 +329,6 @@ class AppTheme {
           ),
         ),
       ),
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: vermilionLight,
@@ -346,17 +344,18 @@ class AppTheme {
           ),
         ),
       ),
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: const Color(0xFF3A3A3A),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: const Color(0xFF9E9E9E).withValues(alpha: 0.3)),
+          borderSide:
+              BorderSide(color: const Color(0xFF9E9E9E).withOpacity(0.3)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: const Color(0xFF9E9E9E).withValues(alpha: 0.3)),
+          borderSide:
+              BorderSide(color: const Color(0xFF9E9E9E).withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -368,10 +367,9 @@ class AppTheme {
         ),
         hintStyle: TextStyle(
           fontFamily: 'SourceHanSerifSC',
-          color: const Color(0xFF9E9E9E).withValues(alpha: 0.5),
+          color: const Color(0xFF9E9E9E).withOpacity(0.5),
         ),
       ),
-
       chipTheme: ChipThemeData(
         backgroundColor: const Color(0xFF3A3A3A),
         selectedColor: vermilionDark,
@@ -385,8 +383,7 @@ class AppTheme {
         ),
         side: BorderSide.none,
       ),
-
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: const Color(0xFF2C2C2C),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -398,9 +395,8 @@ class AppTheme {
           color: Color(0xFFE0E0E0),
         ),
       ),
-
       dividerTheme: DividerThemeData(
-        color: const Color(0xFF9E9E9E).withValues(alpha: 0.2),
+        color: const Color(0xFF9E9E9E).withOpacity(0.2),
         thickness: 1,
         space: 1,
       ),
@@ -412,21 +408,81 @@ class AppTheme {
   static TextTheme _buildTextTheme() {
     const String fontFamily = 'SourceHanSerifSC';
     return const TextTheme(
-      displayLarge: TextStyle(fontFamily: fontFamily, fontSize: 32, fontWeight: FontWeight.w700, letterSpacing: 1.2),
-      displayMedium: TextStyle(fontFamily: fontFamily, fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: 1.0),
-      displaySmall: TextStyle(fontFamily: fontFamily, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: 0.8),
-      headlineLarge: TextStyle(fontFamily: fontFamily, fontSize: 22, fontWeight: FontWeight.w600, letterSpacing: 0.6),
-      headlineMedium: TextStyle(fontFamily: fontFamily, fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 0.4),
-      headlineSmall: TextStyle(fontFamily: fontFamily, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 0.2),
-      titleLarge: TextStyle(fontFamily: fontFamily, fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.1),
-      titleMedium: TextStyle(fontFamily: fontFamily, fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.1),
-      titleSmall: TextStyle(fontFamily: fontFamily, fontSize: 13, fontWeight: FontWeight.w500, letterSpacing: 0.1),
-      bodyLarge: TextStyle(fontFamily: fontFamily, fontSize: 16, fontWeight: FontWeight.w400, letterSpacing: 0.5),
-      bodyMedium: TextStyle(fontFamily: fontFamily, fontSize: 14, fontWeight: FontWeight.w400, letterSpacing: 0.25),
-      bodySmall: TextStyle(fontFamily: fontFamily, fontSize: 12, fontWeight: FontWeight.w400, letterSpacing: 0.4),
-      labelLarge: TextStyle(fontFamily: fontFamily, fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.1),
-      labelMedium: TextStyle(fontFamily: fontFamily, fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 0.5),
-      labelSmall: TextStyle(fontFamily: fontFamily, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.5),
+      displayLarge: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 32,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2),
+      displayMedium: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 28,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.0),
+      displaySmall: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.8),
+      headlineLarge: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 22,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.6),
+      headlineMedium: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.4),
+      headlineSmall: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2),
+      titleLarge: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1),
+      titleMedium: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1),
+      titleSmall: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1),
+      bodyLarge: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.5),
+      bodyMedium: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.25),
+      bodySmall: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.4),
+      labelLarge: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1),
+      labelMedium: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.5),
+      labelSmall: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.5),
     );
   }
 }

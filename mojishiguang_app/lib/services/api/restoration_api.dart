@@ -20,6 +20,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../models/restoration/damage_mask.dart';
 import '../../models/restoration/input_image.dart';
 import '../../models/restoration/quality_metrics.dart';
@@ -88,9 +89,7 @@ class RestorationApiService {
       final response = await _dio.post(
         '/restoration/detect',
         data: formData,
-        options: Options(
-          headers: {'Content-Type': 'multipart/form-data'},
-        ),
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
 
       if (response.statusCode == 200) {
@@ -169,8 +168,8 @@ class RestorationApiService {
           image.filePath,
           filename: 'input_image${_getExtension(image.filePath)}',
         ),
-        'mask': await MultipartFile.fromFile(
-          mask.maskFilePath,
+        'mask': MultipartFile.fromBytes(
+          mask.maskBytes,
           filename: 'damage_mask.png',
         ),
         if (style != null)
@@ -184,9 +183,7 @@ class RestorationApiService {
       final response = await _dio.post(
         '/restoration/restore',
         data: formData,
-        options: Options(
-          headers: {'Content-Type': 'multipart/form-data'},
-        ),
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
         onSendProgress: (sent, total) {
           if (onProgress != null && total > 0) {
             onProgress(sent / total * 0.3); // 上传进度占 30%
@@ -203,8 +200,13 @@ class RestorationApiService {
         final data = response.data as Map<String, dynamic>;
         final elapsed = DateTime.now().difference(startTime).inMilliseconds;
 
+        final resultPath = await _materializeResultImage(
+          data['result_path'] as String,
+          prefix: 'restoration',
+        );
+
         return RestoredImage(
-          filePath: data['result_path'] as String,
+          filePath: resultPath,
           methodUsed: method,
           width: data['width'] as int? ?? image.width,
           height: data['height'] as int? ?? image.height,
@@ -297,9 +299,7 @@ class RestorationApiService {
       final response = await _dio.post(
         '/restoration/evaluate',
         data: formData,
-        options: Options(
-          headers: {'Content-Type': 'multipart/form-data'},
-        ),
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
 
       if (response.statusCode == 200) {
@@ -310,8 +310,7 @@ class RestorationApiService {
           lpips: (data['lpips'] as num?)?.toDouble(),
           fid: (data['fid'] as num?)?.toDouble(),
           nimaScore: (data['nima_score'] as num?)?.toDouble(),
-          textReadabilityScore:
-              (data['text_readability'] as num?)?.toDouble(),
+          textReadabilityScore: (data['text_readability'] as num?)?.toDouble(),
           strokeContinuityScore:
               (data['stroke_continuity'] as num?)?.toDouble(),
           colorConsistencyScore:
@@ -365,17 +364,20 @@ class RestorationApiService {
       final response = await _dio.post(
         '/restoration/style-transfer',
         data: formData,
-        options: Options(
-          headers: {'Content-Type': 'multipart/form-data'},
-        ),
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         final elapsed = DateTime.now().difference(startTime).inMilliseconds;
 
+        final resultPath = await _materializeResultImage(
+          data['result_path'] as String,
+          prefix: 'restoration_style',
+        );
+
         return RestoredImage(
-          filePath: data['result_path'] as String,
+          filePath: resultPath,
           methodUsed: image.methodUsed,
           width: data['width'] as int? ?? image.width,
           height: data['height'] as int? ?? image.height,
@@ -399,11 +401,34 @@ class RestorationApiService {
     }
   }
 
+  /// 将服务端结果下载为可由后续预览、评估和风格调整复用的本地文件。
+  Future<String> _materializeResultImage(
+    String resultLocation, {
+    required String prefix,
+  }) async {
+    final uri = Uri.tryParse(resultLocation);
+    if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
+      if (await File(resultLocation).exists()) {
+        return resultLocation;
+      }
+      throw const RestorationApiException('服务端返回的修复结果路径无效');
+    }
+
+    final directory = await getTemporaryDirectory();
+    final extension = _getExtension(uri.path);
+    final filePath =
+        '${directory.path}${Platform.pathSeparator}${prefix}_${DateTime.now().microsecondsSinceEpoch}$extension';
+    await _dio.downloadUri(uri, filePath);
+    return filePath;
+  }
+
   /// 获取文件扩展名
   String _getExtension(String filePath) {
     final dotIndex = filePath.lastIndexOf('.');
     if (dotIndex == -1) return '.jpg';
-    return filePath.substring(dotIndex);
+    final extension = filePath.substring(dotIndex).toLowerCase();
+    const supportedExtensions = {'.jpg', '.jpeg', '.png', '.webp'};
+    return supportedExtensions.contains(extension) ? extension : '.jpg';
   }
 
   /// 取消所有正在进行的请求

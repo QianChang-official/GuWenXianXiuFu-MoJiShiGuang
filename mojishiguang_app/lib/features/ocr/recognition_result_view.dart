@@ -16,8 +16,6 @@
 /// - 自动化语义断句
 /// - 导出文本/分享
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -43,8 +41,7 @@ class RecognitionResultView extends ConsumerStatefulWidget {
       _RecognitionResultViewState();
 }
 
-class _RecognitionResultViewState
-    extends ConsumerState<RecognitionResultView> {
+class _RecognitionResultViewState extends ConsumerState<RecognitionResultView> {
   /// 是否使用竖排显示
   bool _isVertical = false;
 
@@ -76,7 +73,7 @@ class _RecognitionResultViewState
               SizedBox(height: 16),
               Text('暂无识别结果', style: TextStyle(fontSize: 16)),
               SizedBox(height: 8),
-              Text('请��完成古籍文字识别'),
+              Text('请先完成古籍文字识别'),
             ],
           ),
         ),
@@ -135,7 +132,7 @@ class _RecognitionResultViewState
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -143,7 +140,7 @@ class _RecognitionResultViewState
       ),
       child: Column(
         children: [
-          // 标签��换
+          // 标签切换
           Row(
             children: [
               _buildTabButton('识别文本', 0),
@@ -153,8 +150,7 @@ class _RecognitionResultViewState
           // 格式工具条
           if (_selectedTab == 0)
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Row(
                 children: [
                   // 竖排/横排切换
@@ -186,11 +182,11 @@ class _RecognitionResultViewState
                   const Spacer(),
                   // 总体置信度
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: _confidenceColor(result.overallConfidence)
-                          .withValues(alpha: 0.1),
+                          .withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -207,8 +203,7 @@ class _RecognitionResultViewState
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color:
-                                _confidenceColor(result.overallConfidence),
+                            color: _confidenceColor(result.overallConfidence),
                           ),
                         ),
                       ],
@@ -244,9 +239,7 @@ class _RecognitionResultViewState
             style: TextStyle(
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              color: isSelected
-                  ? AppTheme.vermilion
-                  : AppTheme.inkBlackLight,
+              color: isSelected ? AppTheme.vermilion : AppTheme.inkBlackLight,
             ),
           ),
         ),
@@ -282,8 +275,7 @@ class _RecognitionResultViewState
               label,
               style: TextStyle(
                 fontSize: 12,
-                fontWeight:
-                    selected ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                 color: selected ? Colors.white : AppTheme.inkBlackLight,
               ),
             ),
@@ -393,8 +385,7 @@ class _RecognitionResultViewState
                         decoration: isUncertain
                             ? TextDecoration.underline
                             : TextDecoration.none,
-                        decorationColor:
-                            AppTheme.vermilion.withValues(alpha: 0.5),
+                        decorationColor: AppTheme.vermilion.withOpacity(0.5),
                         decorationThickness: 2,
                       ),
                     ),
@@ -424,9 +415,9 @@ class _RecognitionResultViewState
               color: AppTheme.vermilion,
               fontWeight: FontWeight.w600,
               decoration: TextDecoration.underline,
-              decorationColor: AppTheme.vermilion.withValues(alpha: 0.5),
+              decorationColor: AppTheme.vermilion.withOpacity(0.5),
               decorationThickness: 2,
-              backgroundColor: AppTheme.vermilion.withValues(alpha: 0.08),
+              backgroundColor: AppTheme.vermilion.withOpacity(0.08),
             ),
             // 实际交互通过 WidgetSpan 实现
           ),
@@ -451,9 +442,9 @@ class _RecognitionResultViewState
         charFrequency[char] = (charFrequency[char] ?? 0) + 1;
       }
     }
-    final List<MapEntry<String, int>> sortedChars =
-        charFrequency.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value));
+    final List<MapEntry<String, int>> sortedChars = charFrequency.entries
+        .toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -602,7 +593,7 @@ class _RecognitionResultViewState
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: AppTheme.vermilion.withValues(alpha: 0.1),
+                                  color: AppTheme.vermilion.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Center(
@@ -619,8 +610,7 @@ class _RecognitionResultViewState
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       '位置 ${uc.index}',
@@ -725,7 +715,8 @@ class _RecognitionResultViewState
               ),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.text_snippet, color: AppTheme.vermilion),
+                leading:
+                    const Icon(Icons.text_snippet, color: AppTheme.vermilion),
                 title: const Text('纯文本 (.txt)'),
                 subtitle: const Text('导出识别文本'),
                 onTap: () {
@@ -735,14 +726,13 @@ class _RecognitionResultViewState
               ),
               if (semantic != null)
                 ListTile(
-                  leading: const Icon(Icons.format_quote,
-                      color: AppTheme.vermilion),
+                  leading:
+                      const Icon(Icons.format_quote, color: AppTheme.vermilion),
                   title: const Text('断句文本'),
                   subtitle: const Text('含句读标注'),
                   onTap: () {
                     Navigator.pop(context);
-                    _exportText(
-                        semantic.punctuatedText, 'ocr_punctuated.txt');
+                    _exportText(semantic.punctuatedText, 'ocr_punctuated.txt');
                   },
                 ),
               ListTile(
@@ -818,22 +808,84 @@ class _RecognitionResultViewState
   String _simpleToTraditional(String text) {
     // 简繁对照表（仅包含常见古文字，完整转换应使用后端服务）
     const Map<String, String> _simpleToTraditionalMap = {
-      '为': '爲', '会': '會', '与': '與', '书': '書', '发': '發',
-      '云': '雲', '体': '體', '国': '國', '学': '學', '门': '門',
-      '开': '開', '关': '關', '风': '風', '龙': '龍', '万': '萬',
-      '无': '無', '东': '東', '乐': '樂', '礼': '禮', '旧': '舊',
-      '时': '時', '间': '間', '长': '長', '门': '門', '马': '馬',
-      '鱼': '魚', '鸟': '鳥', '贝': '貝', '见': '見', '车': '車',
-      '达': '達', '过': '過', '进': '進', '远': '遠', '运': '運',
-      '边': '邊', '还': '還', '这': '這', '说': '說', '话': '話',
-      '语': '語', '认': '認', '识': '識', '读': '讀', '课': '課',
-      '记': '記', '谢': '謝', '议': '議', '论': '論', '证': '證',
-      '实': '實', '质': '質', '问': '問', '题': '題', '应': '應',
-      '当': '當', '点': '點', '对': '對', '观': '觀', '党': '黨',
-      '爱': '愛', '护': '護', '传': '傳', '统': '統', '经': '經',
-      '济': '濟', '织': '織', '红': '紅', '级': '級', '纪': '紀',
-      '约': '約', '级': '級', '纳': '納', '给': '給', '续': '續',
-      '维': '維', '纲': '綱', '综': '綜', '绍': '紹', '组': '組',
+      '为': '爲',
+      '会': '會',
+      '与': '與',
+      '书': '書',
+      '发': '發',
+      '云': '雲',
+      '体': '體',
+      '国': '國',
+      '学': '學',
+      '门': '門',
+      '开': '開',
+      '关': '關',
+      '风': '風',
+      '龙': '龍',
+      '万': '萬',
+      '无': '無',
+      '东': '東',
+      '乐': '樂',
+      '礼': '禮',
+      '旧': '舊',
+      '时': '時',
+      '间': '間',
+      '长': '長',
+      '马': '馬',
+      '鱼': '魚',
+      '鸟': '鳥',
+      '贝': '貝',
+      '见': '見',
+      '车': '車',
+      '达': '達',
+      '过': '過',
+      '进': '進',
+      '远': '遠',
+      '运': '運',
+      '边': '邊',
+      '还': '還',
+      '这': '這',
+      '说': '說',
+      '话': '話',
+      '语': '語',
+      '认': '認',
+      '识': '識',
+      '读': '讀',
+      '课': '課',
+      '记': '記',
+      '谢': '謝',
+      '议': '議',
+      '论': '論',
+      '证': '證',
+      '实': '實',
+      '质': '質',
+      '问': '問',
+      '题': '題',
+      '应': '應',
+      '当': '當',
+      '点': '點',
+      '对': '對',
+      '观': '觀',
+      '党': '黨',
+      '爱': '愛',
+      '护': '護',
+      '传': '傳',
+      '统': '統',
+      '经': '經',
+      '济': '濟',
+      '织': '織',
+      '红': '紅',
+      '级': '級',
+      '纪': '紀',
+      '约': '約',
+      '纳': '納',
+      '给': '給',
+      '续': '續',
+      '维': '維',
+      '纲': '綱',
+      '综': '綜',
+      '绍': '紹',
+      '组': '組',
     };
 
     return text.split('').map((char) {

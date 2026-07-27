@@ -6,14 +6,23 @@ build/
 *.iml
 .fl-plugins
 .fl-plugins-dependencies
+.flutter-plugins
+.flutter-plugins-dependencies
+**/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+**/android/local.properties
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GeneratedPluginRegistrant.h
+**/ios/Runner/GeneratedPluginRegistrant.m
 *.freezed.dart
 *.g.dart
 *.gen.dart
 
 # Android
-android/.gradle/
-android/app/build/
-android/local.properties
+**/android/.gradle/
+**/android/app/build/
+**/android/local.properties
 *.apk
 *.aab
 *.keystore

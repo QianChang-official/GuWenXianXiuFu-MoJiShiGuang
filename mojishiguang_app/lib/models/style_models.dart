@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../core/utils/json_converters.dart';
 
 part 'style_models.freezed.dart';
 part 'style_models.g.dart';
@@ -288,10 +289,10 @@ class StrokeAnalysis with _$StrokeAnalysis {
     @Default(0.0) double accuracy,
 
     /// 笔画起始位置 (x, y)
-    @Default(Offset.zero) Offset startPosition,
+    @OffsetConverter() @Default(Offset.zero) Offset startPosition,
 
     /// 笔画结束位置
-    @Default(Offset.zero) Offset endPosition,
+    @OffsetConverter() @Default(Offset.zero) Offset endPosition,
 
     /// 笔画长度（像素）
     @Default(0.0) double length,

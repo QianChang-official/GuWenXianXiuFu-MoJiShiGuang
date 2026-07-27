@@ -12,7 +12,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -80,17 +79,14 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
       decoration: BoxDecoration(
         color: theme.cardColor,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.15)),
+          bottom: BorderSide(color: Colors.grey.withOpacity(0.15)),
         ),
       ),
       child: Row(
         children: [
-          if (hasRegions || hasResult)
-            _buildTabButton('识别设置', 0, theme),
-          if (hasRegions)
-            _buildTabButton('检测区域', 1, theme),
-          if (hasResult)
-            _buildTabButton('识别结果', 2, theme),
+          if (hasRegions || hasResult) _buildTabButton('识别设置', 0, theme),
+          if (hasRegions) _buildTabButton('检测区域', 1, theme),
+          if (hasResult) _buildTabButton('识别结果', 2, theme),
         ],
       ),
     );
@@ -117,8 +113,9 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              color:
-                  isSelected ? AppTheme.vermilion : theme.colorScheme.onSurfaceVariant,
+              color: isSelected
+                  ? AppTheme.vermilion
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -127,8 +124,7 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
   }
 
   /// 根据当前标签页返回内容
-  Widget _buildContent(
-      ThemeData theme, OcrState state, OcrNotifier notifier) {
+  Widget _buildContent(ThemeData theme, OcrState state, OcrNotifier notifier) {
     // 如果有结果且有结果标签页选中
     if (_currentTab == 2 && state.ocrResult != null) {
       return const RecognitionResultView();
@@ -181,8 +177,7 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
           if (state.detectedRegions.isNotEmpty)
             _buildDetectionPreview(theme, state),
 
-          if (state.ocrResult != null)
-            _buildRecognitionPreview(theme, state),
+          if (state.ocrResult != null) _buildRecognitionPreview(theme, state),
 
           // ─── 处理进度指示器 ───────────────────────────────
           if (state.isProcessing) _buildProgressIndicator(theme, state),
@@ -228,7 +223,8 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
                     return Container(
                       height: 180,
                       color: Colors.grey[200],
-                      child: const Center(child: Icon(Icons.broken_image, size: 48)),
+                      child: const Center(
+                          child: Icon(Icons.broken_image, size: 48)),
                     );
                   },
                 ),
@@ -239,7 +235,7 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
                 ),
                 child: Center(
                   child: Column(
@@ -296,7 +292,10 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
                     ?.copyWith(fontWeight: FontWeight.bold)),
             const Spacer(),
             ToggleButtons(
-              isSelected: const [true, false],
+              isSelected: [
+                state.selectedMode == OcrMode.quick,
+                state.selectedMode == OcrMode.deepAnalysis,
+              ],
               borderRadius: BorderRadius.circular(8),
               constraints: const BoxConstraints(minWidth: 80, minHeight: 32),
               children: [
@@ -318,7 +317,9 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
                 ),
               ],
               onPressed: (index) {
-                // 切换模式由 provider 管理
+                notifier.selectMode(
+                  index == 0 ? OcrMode.quick : OcrMode.deepAnalysis,
+                );
               },
             ),
           ],
@@ -335,7 +336,8 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            Icon(Icons.detector, size: 20, color: theme.colorScheme.primary),
+            Icon(Icons.document_scanner,
+                size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<OcrDetector>(
@@ -416,8 +418,8 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
             size: 20, color: theme.colorScheme.primary),
         title: const Text('字典关联',
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-        subtitle: const Text('关联说文解字、康熙字典等古籍字典',
-            style: TextStyle(fontSize: 12)),
+        subtitle:
+            const Text('关联说文解字、康熙字典等古籍字典', style: TextStyle(fontSize: 12)),
         value: state.enableDictionaryLinking,
         onChanged: (_) => notifier.toggleDictionaryLinking(),
       ),
@@ -435,7 +437,7 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
       children: [
         Expanded(
           child: ElevatedButton.icon(
-            icon: const Icon(Icons.detector, size: 18),
+            icon: const Icon(Icons.document_scanner, size: 18),
             label: Text(
               canDetect
                   ? '文字检测'
@@ -449,7 +451,7 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: OutlinedButton.icon(
-            icon: const Icon(Icons.ocr, size: 18),
+            icon: const Icon(Icons.text_fields, size: 18),
             label: Text(
               canRecognize
                   ? '开始识别'
@@ -473,7 +475,7 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              Icon(Icons.lines,
+              Icon(Icons.format_line_spacing,
                   size: 20, color: theme.colorScheme.primary),
               const SizedBox(width: 8),
               Text(
@@ -503,8 +505,7 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              Icon(Icons.text_fields,
-                  size: 20, color: AppTheme.vermilion),
+              Icon(Icons.text_fields, size: 20, color: AppTheme.vermilion),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
@@ -557,7 +558,7 @@ class _OcrScreenState extends ConsumerState<OcrScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Card(
-        color: AppTheme.vermilion.withValues(alpha: 0.05),
+        color: AppTheme.vermilion.withOpacity(0.05),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(

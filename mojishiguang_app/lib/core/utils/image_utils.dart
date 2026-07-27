@@ -16,8 +16,8 @@ class ImageUtils {
   /// [imageQuality] 图片质量 (0-100)
   static Future<XFile?> pickImage({
     required ImageSource source,
-    int? maxWidth,
-    int? maxHeight,
+    double? maxWidth,
+    double? maxHeight,
     int? imageQuality,
   }) async {
     final ImagePicker picker = ImagePicker();
@@ -50,12 +50,14 @@ class ImageUtils {
     int targetWidth = image.width;
     int targetHeight = image.height;
     if (targetWidth > maxDimension || targetHeight > maxDimension) {
-      final double ratio = maxDimension / (targetWidth > targetHeight ? targetWidth : targetHeight);
+      final double ratio = maxDimension /
+          (targetWidth > targetHeight ? targetWidth : targetHeight);
       targetWidth = (targetWidth * ratio).round();
       targetHeight = (targetHeight * ratio).round();
     }
 
-    final ui.Image resized = await _resizeImage(image, targetWidth, targetHeight);
+    final ui.Image resized =
+        await _resizeImage(image, targetWidth, targetHeight);
     final ByteData? byteData = await resized.toByteData(
       format: ui.ImageByteFormat.png,
     );
@@ -74,19 +76,21 @@ class ImageUtils {
     final ui.Image image = frame.image;
 
     // 居中裁剪
-    final int cropSize = image.width < image.height ? image.width : image.height;
+    final int cropSize =
+        image.width < image.height ? image.width : image.height;
     final int offsetX = (image.width - cropSize) ~/ 2;
     final int offsetY = (image.height - cropSize) ~/ 2;
 
-    final PictureRecorder recorder = PictureRecorder();
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     canvas.drawImageRect(
       image,
-      Rect.fromLTWH(offsetX.toDouble(), offsetY.toDouble(), cropSize.toDouble(), cropSize.toDouble()),
+      Rect.fromLTWH(offsetX.toDouble(), offsetY.toDouble(), cropSize.toDouble(),
+          cropSize.toDouble()),
       Rect.fromLTWH(0, 0, targetSize.toDouble(), targetSize.toDouble()),
       Paint()..filterQuality = FilterQuality.high,
     );
-    final Picture picture = recorder.endRecording();
+    final ui.Picture picture = recorder.endRecording();
     final ui.Image resized = await picture.toImage(targetSize, targetSize);
     final ByteData? byteData = await resized.toByteData(
       format: ui.ImageByteFormat.png,
@@ -105,17 +109,17 @@ class ImageUtils {
     final ui.FrameInfo frame = await codec.getNextFrame();
     final ui.Image image = frame.image;
 
-    final PictureRecorder recorder = PictureRecorder();
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     final Paint paint = Paint()
       ..colorFilter = const ColorFilter.matrix(<double>[
-        1.2, 0, 0, 0, 0,   // 红色通道增益
-        0, 1.2, 0, 0, 0,   // 绿色通道增益
-        0, 0, 1.2, 0, 0,   // 蓝色通道增益
-        0, 0, 0, 1, 0,     // Alpha 不变
+        1.2, 0, 0, 0, 0, // 红色通道增益
+        0, 1.2, 0, 0, 0, // 绿色通道增益
+        0, 0, 1.2, 0, 0, // 蓝色通道增益
+        0, 0, 0, 1, 0, // Alpha 不变
       ]);
     canvas.drawImage(image, Offset.zero, paint);
-    final Picture picture = recorder.endRecording();
+    final ui.Picture picture = recorder.endRecording();
     final ui.Image result = await picture.toImage(image.width, image.height);
     final ByteData? byteData = await result.toByteData(
       format: ui.ImageByteFormat.png,
@@ -131,17 +135,17 @@ class ImageUtils {
     final ui.FrameInfo frame = await codec.getNextFrame();
     final ui.Image image = frame.image;
 
-    final PictureRecorder recorder = PictureRecorder();
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     final Paint paint = Paint()
       ..colorFilter = const ColorFilter.matrix(<double>[
-        0.2126, 0.7152, 0.0722, 0, 0,  // R
-        0.2126, 0.7152, 0.0722, 0, 0,  // G
-        0.2126, 0.7152, 0.0722, 0, 0,  // B
-        0, 0, 0, 1, 0,                   // A
+        0.2126, 0.7152, 0.0722, 0, 0, // R
+        0.2126, 0.7152, 0.0722, 0, 0, // G
+        0.2126, 0.7152, 0.0722, 0, 0, // B
+        0, 0, 0, 1, 0, // A
       ]);
     canvas.drawImage(image, Offset.zero, paint);
-    final Picture picture = recorder.endRecording();
+    final ui.Picture picture = recorder.endRecording();
     final ui.Image result = await picture.toImage(image.width, image.height);
     final ByteData? byteData = await result.toByteData(
       format: ui.ImageByteFormat.png,
@@ -236,7 +240,7 @@ class ImageUtils {
     int targetWidth,
     int targetHeight,
   ) async {
-    final PictureRecorder recorder = PictureRecorder();
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     canvas.drawImageRect(
       image,
@@ -244,7 +248,7 @@ class ImageUtils {
       Rect.fromLTWH(0, 0, targetWidth.toDouble(), targetHeight.toDouble()),
       Paint()..filterQuality = FilterQuality.high,
     );
-    final Picture picture = recorder.endRecording();
+    final ui.Picture picture = recorder.endRecording();
     return picture.toImage(targetWidth, targetHeight);
   }
 }

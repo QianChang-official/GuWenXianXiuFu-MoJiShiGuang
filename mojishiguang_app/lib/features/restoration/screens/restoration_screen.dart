@@ -35,7 +35,7 @@ class _RestorationScreenState extends ConsumerState<RestorationScreen> {
   /// 核心功能卡片数据
   static const List<_FeatureCardData> _featureCards = [
     _FeatureCardData(
-      icon: Icons.detective,
+      icon: Icons.search,
       title: '智能破损检测',
       subtitle: '自动识别虫蛀、水渍、缺角等破损类型',
       color: Color(0xFFE74C3C),
@@ -172,7 +172,7 @@ class _RestorationScreenState extends ConsumerState<RestorationScreen> {
                 return Icon(
                   Icons.auto_fix_high_rounded,
                   size: 80,
-                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                  color: theme.colorScheme.primary.withOpacity(0.3),
                 );
               },
             ),
@@ -191,7 +191,7 @@ class _RestorationScreenState extends ConsumerState<RestorationScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppTheme.vermilion.withValues(alpha: 0.1),
+              color: AppTheme.vermilion.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
@@ -340,7 +340,7 @@ class _FeatureCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: data.color.withValues(alpha: 0.12),
+                color: data.color.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(data.icon, color: data.color, size: 28),
@@ -389,7 +389,7 @@ class _PaperPreviewTile extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppTheme.vermilion.withValues(alpha: 0.1),
+                color: AppTheme.vermilion.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
@@ -498,10 +498,9 @@ class _PaperCategorySection extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.vermilion.withValues(alpha: 0.1),
+                  color: AppTheme.vermilion.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -553,8 +552,7 @@ class _PaperCategorySection extends StatelessWidget {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       paper.title,

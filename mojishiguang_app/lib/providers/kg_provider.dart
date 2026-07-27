@@ -5,9 +5,6 @@ import '../services/api/kg_api.dart';
 
 part 'kg_provider.freezed.dart';
 
-/// 知识图谱视图模式
-enum KgViewMode { graph, timeline, list }
-
 /// 知识图谱完整状态
 @freezed
 class KgState with _$KgState {
@@ -43,7 +40,7 @@ class KgState with _$KgState {
 }
 
 class KgNotifier extends Notifier<KgState> {
-  final KgApiService _apiService = KgApiService();
+  final KgApiService _apiService = KgApiService.instance;
 
   @override
   KgState build() => KgState.initial();
@@ -75,10 +72,7 @@ class KgNotifier extends Notifier<KgState> {
         entities: entities,
         relations: relations,
       );
-      state = state.copyWith(
-        graph: graph,
-        progress: 0.8,
-      );
+      state = state.copyWith(graph: graph, progress: 0.8);
 
       // 4. 构建时间线
       final timeline = await _apiService.generateTimeline(entities);
@@ -89,24 +83,24 @@ class KgNotifier extends Notifier<KgState> {
         searchHistory: [query, ...state.searchHistory].take(20).toList(),
       );
     } catch (e) {
-      state = state.copyWith(
-        isProcessing: false,
-        errorMessage: '图谱构建失败: $e',
-      );
+      state = state.copyWith(isProcessing: false, errorMessage: '图谱构建失败: $e');
     }
   }
 
   /// 展开实体详情
   Future<void> expandEntity(Entity entity) async {
-    state = state.copyWith(isProcessing: true, errorMessage: null);
+    state = state.copyWith(
+      selectedEntity: entity,
+      entityDetail: null,
+      isProcessing: true,
+      errorMessage: null,
+    );
     try {
       final detail = await _apiService.getEntityDetail(entity.id);
-      state = state.copyWith(
-        selectedEntity: entity,
-        entityDetail: detail,
-        isProcessing: false,
-      );
+      if (state.selectedEntity?.id != entity.id) return;
+      state = state.copyWith(entityDetail: detail, isProcessing: false);
     } catch (e) {
+      if (state.selectedEntity?.id != entity.id) return;
       state = state.copyWith(isProcessing: false, errorMessage: '实体详情获取失败: $e');
     }
   }
@@ -118,9 +112,10 @@ class KgNotifier extends Notifier<KgState> {
     state = state.copyWith(isProcessing: true, progress: 0.0);
 
     try {
-      final expandedGraph = await _apiService.expandGraph(
-        state.graph!,
+      final expandedGraph = await _apiService.queryKnowledgeGraph(
+        query: state.searchQuery,
         depth: nextDepth,
+        entityFilter: state.activeFilters.isEmpty ? null : state.activeFilters,
       );
       state = state.copyWith(
         graph: expandedGraph,
@@ -156,7 +151,11 @@ class KgNotifier extends Notifier<KgState> {
   }
 
   void clearSelection() {
-    state = state.copyWith(selectedEntity: null, entityDetail: null);
+    state = state.copyWith(
+      selectedEntity: null,
+      entityDetail: null,
+      isProcessing: false,
+    );
   }
 
   void reset() => state = KgState.initial();

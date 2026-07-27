@@ -56,17 +56,29 @@ class _KgScreenState extends ConsumerState<KgScreen> {
     super.dispose();
   }
 
-  /// 初始化节点位置（随机分布）
-  void _initNodePositions() {
-    final state = ref.read(kgProvider);
-    if (state.graph != null) {
-      for (final entity in state.graph!.entities) {
-        _nodePositions[entity.id] = Offset(
+  /// 同步节点位置，为异步新增的节点补充确定性初始坐标。
+  void _initNodePositions([KnowledgeGraph? graph]) {
+    final currentGraph = graph ?? ref.read(kgProvider).graph;
+    if (currentGraph == null) return;
+
+    final entityIds = currentGraph.entities.map((entity) => entity.id).toSet();
+    _nodePositions.removeWhere((entityId, _) => !entityIds.contains(entityId));
+    for (final entity in currentGraph.entities) {
+      _nodePositions.putIfAbsent(
+        entity.id,
+        () => Offset(
           (entity.id.hashCode % 400 - 200).toDouble(),
           (entity.id.hashCode % 300 - 150).toDouble(),
-        );
-      }
+        ),
+      );
     }
+  }
+
+  Entity? _findEntity(KnowledgeGraph graph, String entityId) {
+    for (final entity in graph.entities) {
+      if (entity.id == entityId) return entity;
+    }
+    return null;
   }
 
   /// 执行搜索
@@ -110,21 +122,17 @@ class _KgScreenState extends ConsumerState<KgScreen> {
           _buildToolbar(theme, state, notifier),
 
           // ─── 统计信息条 ────────────────────────────────────
-          if (state.graph != null)
-            _buildStatsBar(theme, state),
+          if (state.graph != null) _buildStatsBar(theme, state),
 
           // ─── 主内容区 ──────────────────────────────────────
-          Expanded(
-            child: _buildContent(theme, state, notifier),
-          ),
+          Expanded(child: _buildContent(theme, state, notifier)),
         ],
       ),
     );
   }
 
   /// 搜索栏
-  Widget _buildSearchBar(
-      ThemeData theme, KgState state, KgNotifier notifier) {
+  Widget _buildSearchBar(ThemeData theme, KgState state, KgNotifier notifier) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Column(
@@ -144,8 +152,10 @@ class _KgScreenState extends ConsumerState<KgScreen> {
                     )
                   : null,
               isDense: true,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
             ),
             onChanged: (value) {
               setState(() {});
@@ -166,7 +176,7 @@ class _KgScreenState extends ConsumerState<KgScreen> {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 8,
                   ),
                 ],
@@ -221,18 +231,17 @@ class _KgScreenState extends ConsumerState<KgScreen> {
                   state.viewMode == KgViewMode.list,
                 ],
                 borderRadius: BorderRadius.circular(8),
-                constraints:
-                    const BoxConstraints(minWidth: 64, minHeight: 32),
+                constraints: const BoxConstraints(minWidth: 64, minHeight: 32),
                 onPressed: (index) {
                   notifier.setViewMode(KgViewMode.values[index]);
                 },
                 children: const [
                   Tooltip(message: '图谱视图', child: Icon(Icons.hub, size: 18)),
                   Tooltip(
-                      message: '时间线视图',
-                      child: Icon(Icons.timeline, size: 18)),
-                  Tooltip(
-                      message: '列表视图', child: Icon(Icons.list, size: 18)),
+                    message: '时间线视图',
+                    child: Icon(Icons.timeline, size: 18),
+                  ),
+                  Tooltip(message: '列表视图', child: Icon(Icons.list, size: 18)),
                 ],
               ),
               const Spacer(),
@@ -240,8 +249,7 @@ class _KgScreenState extends ConsumerState<KgScreen> {
               if (state.activeFilters.isNotEmpty)
                 TextButton(
                   onPressed: () => notifier.clearFilters(),
-                  child:
-                      const Text('清除筛选', style: TextStyle(fontSize: 12)),
+                  child: const Text('清除筛选', style: TextStyle(fontSize: 12)),
                 ),
             ],
           ),
@@ -255,11 +263,12 @@ class _KgScreenState extends ConsumerState<KgScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: FilterChip(
-                    label: Text(_entityTypeLabel(type),
-                        style: const TextStyle(fontSize: 11)),
+                    label: Text(
+                      _entityTypeLabel(type),
+                      style: const TextStyle(fontSize: 11),
+                    ),
                     selected: isActive,
-                    selectedColor:
-                        _entityTypeColor(type).withValues(alpha: 0.2),
+                    selectedColor: _entityTypeColor(type).withOpacity(0.2),
                     checkmarkColor: _entityTypeColor(type),
                     onSelected: (_) => notifier.toggleFilter(type),
                     visualDensity: VisualDensity.compact,
@@ -286,10 +295,14 @@ class _KgScreenState extends ConsumerState<KgScreen> {
           _statItem(theme, Icons.circle, '${graph.entities.length}', '实体'),
           const SizedBox(width: 16),
           _statItem(
-              theme, Icons.arrow_right_alt, '${graph.relations.length}', '关系'),
+            theme,
+            Icons.arrow_right_alt,
+            '${graph.relations.length}',
+            '关系',
+          ),
           const SizedBox(width: 16),
-          _statItem(theme, Icons.hierarchy, '深度 ${state.currentDepth}',
-              '当前深度'),
+          _statItem(
+              theme, Icons.account_tree, '深度 ${state.currentDepth}', '当前深度'),
           const Spacer(),
           // 加载/错误状态
           if (state.isProcessing)
@@ -303,8 +316,7 @@ class _KgScreenState extends ConsumerState<KgScreen> {
     );
   }
 
-  Widget _statItem(
-      ThemeData theme, IconData icon, String value, String label) {
+  Widget _statItem(ThemeData theme, IconData icon, String value, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -312,10 +324,7 @@ class _KgScreenState extends ConsumerState<KgScreen> {
         const SizedBox(width: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
         ),
         const SizedBox(width: 2),
         Text(
@@ -330,10 +339,11 @@ class _KgScreenState extends ConsumerState<KgScreen> {
   }
 
   /// 主内容区 — 根据视图模式切换
-  Widget _buildContent(
-      ThemeData theme, KgState state, KgNotifier notifier) {
+  Widget _buildContent(ThemeData theme, KgState state, KgNotifier notifier) {
     // 空状态
-    if (state.graph == null && !state.isProcessing && state.errorMessage == null) {
+    if (state.graph == null &&
+        !state.isProcessing &&
+        state.errorMessage == null) {
       return _buildEmptyState(theme);
     }
 
@@ -366,11 +376,15 @@ class _KgScreenState extends ConsumerState<KgScreen> {
         children: [
           Icon(Icons.hub_outlined, size: 72, color: Colors.grey[300]),
           const SizedBox(height: 16),
-          const Text('搜索古籍人物、地名、官职...',
-              style: TextStyle(fontSize: 16, color: Colors.grey)),
+          const Text(
+            '搜索古籍人物、地名、官职...',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
           const SizedBox(height: 8),
-          const Text('输入关键词探索知识图谱',
-              style: TextStyle(fontSize: 13, color: Colors.grey)),
+          const Text(
+            '输入关键词探索知识图谱',
+            style: TextStyle(fontSize: 13, color: Colors.grey),
+          ),
         ],
       ),
     );
@@ -395,8 +409,7 @@ class _KgScreenState extends ConsumerState<KgScreen> {
   }
 
   /// 错误状态
-  Widget _buildErrorState(
-      ThemeData theme, KgState state, KgNotifier notifier) {
+  Widget _buildErrorState(ThemeData theme, KgState state, KgNotifier notifier) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -424,10 +437,10 @@ class _KgScreenState extends ConsumerState<KgScreen> {
   }
 
   /// 图谱画布模式
-  Widget _buildGraphView(
-      ThemeData theme, KgState state, KgNotifier notifier) {
+  Widget _buildGraphView(ThemeData theme, KgState state, KgNotifier notifier) {
     final graph = state.graph;
     if (graph == null) return const SizedBox.shrink();
+    _initNodePositions(graph);
 
     // 应用筛选
     final filteredEntities = state.activeFilters.isNotEmpty
@@ -439,9 +452,11 @@ class _KgScreenState extends ConsumerState<KgScreen> {
     // 筛选后的关系
     final filteredEntityIds = filteredEntities.map((e) => e.id).toSet();
     final filteredRelations = graph.relations
-        .where((r) =>
-            filteredEntityIds.contains(r.headId) &&
-            filteredEntityIds.contains(r.tailId))
+        .where(
+          (r) =>
+              filteredEntityIds.contains(r.headId) &&
+              filteredEntityIds.contains(r.tailId),
+        )
         .toList();
 
     final filteredGraph = KnowledgeGraph(
@@ -460,13 +475,17 @@ class _KgScreenState extends ConsumerState<KgScreen> {
             nodePositions: _nodePositions,
             selectedEntityId: state.selectedEntity?.id,
             onNodeTap: (entityId) {
-              final entity = graph.entities.firstWhere(
-                (e) => e.id == entityId,
-                orElse: () => graph.entities.first,
-              );
-              notifier.expandEntity(entity);
+              final entity = _findEntity(graph, entityId);
+              if (entity != null) notifier.expandEntity(entity);
             },
-            onNodeDoubleTap: (entityId) {
+            onNodeDoubleTap: (entityId) async {
+              final entity = _findEntity(graph, entityId);
+              if (entity == null) return;
+              await notifier.expandEntity(entity);
+              if (!context.mounted ||
+                  ref.read(kgProvider).entityDetail?.entity.id != entityId) {
+                return;
+              }
               context.push('/kg/entity');
             },
             onNodeDrag: (entityId, position) {
@@ -483,11 +502,8 @@ class _KgScreenState extends ConsumerState<KgScreen> {
             child: EntityDetailPanel(
               detail: state.entityDetail!,
               onEntityTap: (entityId) {
-                final entity = graph.entities.firstWhere(
-                  (e) => e.id == entityId,
-                  orElse: () => graph.entities.first,
-                );
-                notifier.expandEntity(entity);
+                final entity = _findEntity(graph, entityId);
+                if (entity != null) notifier.expandEntity(entity);
               },
               onClose: () => notifier.clearSelection(),
             ),
@@ -508,14 +524,16 @@ class _KgScreenState extends ConsumerState<KgScreen> {
       itemCount: timeline.events.length,
       itemBuilder: (context, index) {
         final event = timeline.events[index];
-        return _TimelineEventCard(event: event, isLast: index == timeline.events.length - 1);
+        return _TimelineEventCard(
+          event: event,
+          isLast: index == timeline.events.length - 1,
+        );
       },
     );
   }
 
   /// 列表视图
-  Widget _buildListView(
-      ThemeData theme, KgState state, KgNotifier notifier) {
+  Widget _buildListView(ThemeData theme, KgState state, KgNotifier notifier) {
     final graph = state.graph;
     if (graph == null) return const SizedBox.shrink();
 
@@ -528,8 +546,9 @@ class _KgScreenState extends ConsumerState<KgScreen> {
 
     final entityIds = entities.map((e) => e.id).toSet();
     final relations = graph.relations
-        .where((r) =>
-            entityIds.contains(r.headId) && entityIds.contains(r.tailId))
+        .where(
+          (r) => entityIds.contains(r.headId) && entityIds.contains(r.tailId),
+        )
         .toList();
 
     return ListView(
@@ -538,49 +557,48 @@ class _KgScreenState extends ConsumerState<KgScreen> {
         // 实体列表
         Text(
           '实体 (${entities.length})',
-          style: theme.textTheme.titleSmall
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
-        ...entities.map((entity) => ListTile(
-              dense: true,
-              leading: Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: _entityTypeColor(entity.type),
-                  shape: BoxShape.circle,
-                ),
+        ...entities.map(
+          (entity) => ListTile(
+            dense: true,
+            leading: Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: _entityTypeColor(entity.type),
+                shape: BoxShape.circle,
               ),
-              title: Text(entity.name,
-                  style: const TextStyle(fontSize: 14)),
-              subtitle: Text(
-                _entityTypeLabel(entity.type),
-                style: TextStyle(
-                    fontSize: 12,
-                    color: _entityTypeColor(entity.type)),
+            ),
+            title: Text(entity.name, style: const TextStyle(fontSize: 14)),
+            subtitle: Text(
+              _entityTypeLabel(entity.type),
+              style: TextStyle(
+                fontSize: 12,
+                color: _entityTypeColor(entity.type),
               ),
-              trailing: const Icon(Icons.chevron_right, size: 16),
-              onTap: () => notifier.expandEntity(entity),
-            )),
+            ),
+            trailing: const Icon(Icons.chevron_right, size: 16),
+            onTap: () => notifier.expandEntity(entity),
+          ),
+        ),
         const Divider(),
         const SizedBox(height: 8),
         // 关系列表
         Text(
           '关系 (${relations.length})',
-          style: theme.textTheme.titleSmall
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         ...relations.map((relation) {
-          final head = graph.entities.firstWhere(
-            (e) => e.id == relation.headId,
-            orElse: () => graph.entities.first,
-          );
-          final tail = graph.entities.firstWhere(
-            (e) => e.id == relation.tailId,
-            orElse: () => graph.entities.first,
-          );
+          final head = _findEntity(graph, relation.headId);
+          final tail = _findEntity(graph, relation.tailId);
+          if (head == null || tail == null) return const SizedBox.shrink();
           return ListTile(
             dense: true,
             leading: const Icon(Icons.arrow_right_alt, size: 18),
@@ -588,8 +606,7 @@ class _KgScreenState extends ConsumerState<KgScreen> {
               '${head.name} → ${tail.name}',
               style: const TextStyle(fontSize: 13),
             ),
-            subtitle: Text(relation.name,
-                style: const TextStyle(fontSize: 12)),
+            subtitle: Text(relation.name, style: const TextStyle(fontSize: 12)),
           );
         }),
       ],
@@ -613,12 +630,13 @@ class _KgScreenState extends ConsumerState<KgScreen> {
             _statRow('关系总数', '${graph.relations.length}'),
             _statRow('当前深度', '${state.currentDepth}'),
             const SizedBox(height: 12),
-            const Text('实体类型分布',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const Text(
+              '实体类型分布',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
             const SizedBox(height: 4),
             ...EntityType.values.map((type) {
-              final count =
-                  graph.entities.where((e) => e.type == type).length;
+              final count = graph.entities.where((e) => e.type == type).length;
               if (count == 0) return const SizedBox.shrink();
               return Padding(
                 padding: const EdgeInsets.only(top: 2),
@@ -633,12 +651,18 @@ class _KgScreenState extends ConsumerState<KgScreen> {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(_entityTypeLabel(type),
-                        style: const TextStyle(fontSize: 12)),
+                    Text(
+                      _entityTypeLabel(type),
+                      style: const TextStyle(fontSize: 12),
+                    ),
                     const Spacer(),
-                    Text('$count',
-                        style: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w500)),
+                    Text(
+                      '$count',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -662,9 +686,10 @@ class _KgScreenState extends ConsumerState<KgScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontSize: 13)),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
@@ -724,10 +749,7 @@ class _TimelineEventCard extends StatelessWidget {
   final TimelineEvent event;
   final bool isLast;
 
-  const _TimelineEventCard({
-    required this.event,
-    this.isLast = false,
-  });
+  const _TimelineEventCard({required this.event, this.isLast = false});
 
   @override
   Widget build(BuildContext context) {
@@ -742,10 +764,12 @@ class _TimelineEventCard extends StatelessWidget {
             child: Column(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppTheme.vermilion.withValues(alpha: 0.1),
+                    color: AppTheme.vermilion.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -778,7 +802,7 @@ class _TimelineEventCard extends StatelessWidget {
                 Expanded(
                   child: Container(
                     width: 2,
-                    color: AppTheme.vermilion.withValues(alpha: 0.3),
+                    color: AppTheme.vermilion.withOpacity(0.3),
                   ),
                 ),
             ],

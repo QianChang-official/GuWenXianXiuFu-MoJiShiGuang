@@ -57,9 +57,7 @@ class _MethodSelectorState extends State<MethodSelector> {
   List<RestorationMethod> get _filteredMethods {
     var methods = _allMethods;
     if (_selectedCategory != null) {
-      methods = methods
-          .where((m) => m.category == _selectedCategory)
-          .toList();
+      methods = methods.where((m) => m.category == _selectedCategory).toList();
     }
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
@@ -131,7 +129,7 @@ class _MethodSelectorState extends State<MethodSelector> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+            color: theme.colorScheme.primaryContainer.withOpacity(0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(Icons.menu_book, color: theme.colorScheme.primary),
@@ -216,7 +214,7 @@ class _MethodSelectorState extends State<MethodSelector> {
                   style: const TextStyle(fontSize: 11),
                 ),
                 selected: _selectedCategory == category,
-                selectedColor: _categoryColor(category).withValues(alpha: 0.2),
+                selectedColor: _categoryColor(category).withOpacity(0.2),
                 onSelected: (_) {
                   setState(() {
                     _selectedCategory =
@@ -330,14 +328,13 @@ class _MethodSelectorState extends State<MethodSelector> {
       child: Card(
         elevation: isSelected ? 2 : 0,
         color: isSelected
-            ? categoryColor.withValues(alpha: 0.08)
+            ? categoryColor.withOpacity(0.08)
             : theme.colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: isSelected
-                ? categoryColor
-                : theme.colorScheme.outlineVariant,
+            color:
+                isSelected ? categoryColor : theme.colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -388,10 +385,9 @@ class _MethodSelectorState extends State<MethodSelector> {
               const SizedBox(height: 2),
               // 会议/期刊
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: categoryColor.withValues(alpha: 0.1),
+                  color: categoryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -408,9 +404,7 @@ class _MethodSelectorState extends State<MethodSelector> {
               Row(
                 children: [
                   Icon(
-                    method.supportsOnDevice
-                        ? Icons.phone_android
-                        : Icons.cloud,
+                    method.supportsOnDevice ? Icons.phone_android : Icons.cloud,
                     size: 12,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -445,8 +439,8 @@ class _MethodSelectorState extends State<MethodSelector> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.search_off, size: 48,
-              color: theme.colorScheme.onSurfaceVariant),
+          Icon(Icons.search_off,
+              size: 48, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(height: 16),
           Text(
             _searchQuery.isNotEmpty ? '未找到匹配的方法' : '暂无可用修复方法',
@@ -473,7 +467,7 @@ class _MethodSelectorState extends State<MethodSelector> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.amber.withValues(alpha: 0.2),
+        color: Colors.amber.withOpacity(0.2),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
